@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HUNIKA - Review & Rating Section</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <nav class="flex items-center justify-between px-4 md:px-8 py-4 bg-white border-b border-gray-100">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">H</div>
+      <span class="text-emerald-600 font-bold text-xl tracking-wide">HUNIKA</span>
+    </div>
+    <span class="text-xs text-gray-400 font-medium bg-gray-100 px-3 py-1 rounded-full">Review & Rating Section</span>
+  </nav>
+
+  <main class="max-w-3xl mx-auto px-4 py-10">
+    
+    <div class="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-8">
+      
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 tracking-tight">Reviews & Ratings</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Ulasan asli dari para penghuni </p>
+      </div>
+
+      <div class="bg-emerald-50/40 border border-emerald-100/70 p-5 rounded-xl flex items-center gap-5">
+        <div class="text-center">
+          <span class="text-4xl font-extrabold text-emerald-600 block leading-none">4.5</span>
+          <span class="text-[10px] text-gray-400 mt-1 block">dari 5 poin</span>
+        </div>
+        
+        <div class="w-px h-10 bg-emerald-200/50"></div>
+        
+        <div>
+          <div class="flex items-center gap-0.5">
+            <span class="material-icons text-base text-amber-400">star</span>
+            <span class="material-icons text-base text-amber-400">star</span>
+            <span class="material-icons text-base text-amber-400">star</span>
+            <span class="material-icons text-base text-amber-400">star</span>
+            <span class="material-icons text-base text-gray-200">star_border</span>
+          </div>
+          <span class="text-xs text-gray-400 mt-1 block font-medium">Berdasarkan 2 ulasan aktif</span>
+        </div>
+      </div>
+
+      <div class="border border-gray-100 p-5 rounded-xl bg-gray-50/50 flex flex-col gap-4">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Tulis Ulasan </h3>
+        
+        <div>
+          <label class="text-[11px] font-medium text-gray-400 block mb-1.5">Nama Lengkap</label>
+          <input 
+            type="text" 
+            placeholder="Masukkan nama kamu..." 
+            class="w-full px-3.5 py-2.5 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 text-gray-700 transition">
+        </div>
+        
+        <div>
+          <label class="text-[11px] font-medium text-gray-400 block mb-1.5">Berikan Rating Bintang</label>
+          <div class="flex items-center gap-1">
+            <button class="material-icons text-xl text-gray-300 hover:text-amber-400 hover:scale-110 transition duration-150 cursor-pointer">star_border</button>
+            <button class="material-icons text-xl text-gray-300 hover:text-amber-400 hover:scale-110 transition duration-150 cursor-pointer">star_border</button>
+            <button class="material-icons text-xl text-gray-300 hover:text-amber-400 hover:scale-110 transition duration-150 cursor-pointer">star_border</button>
+            <button class="material-icons text-xl text-gray-300 hover:text-amber-400 hover:scale-110 transition duration-150 cursor-pointer">star_border</button>
+            <button class="material-icons text-xl text-gray-300 hover:text-amber-400 hover:scale-110 transition duration-150 cursor-pointer">star_border</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-medium text-gray-400 block mb-1.5">Ulasan Pengalaman</label>
+          <textarea 
+            rows="3" 
+            placeholder="Ceritakan pengalaman kamu disini..." 
+            class="w-full px-3.5 py-2.5 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 text-gray-700 leading-relaxed transition resize-none"></textarea>
+        </div>
+
+        <div class="text-right">
+          <button class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs rounded-xl shadow-sm transition transform active:scale-95 cursor-pointer">
+            Kirim Ulasan
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Semua Komentar</h3>
+        
+        <div class="p-4 border-b border-gray-100 flex flex-col gap-1.5 bg-gray-50/20 rounded-xl mb-2">
+          <div class="flex justify-between items-center">
+            <strong class="text-xs font-bold text-gray-800">Penghuni 1</strong>
+            <span class="text-[10px] text-gray-400 font-medium">10 Maret 2026</span>
+          </div>
+          <div class="flex items-center gap-0.5">
+            <span class="material-icons text-sm text-amber-400">star</span>
+            <span class="material-icons text-sm text-amber-400">star</span>
+            <span class="material-icons text-sm text-amber-400">star</span>
+            <span class="material-icons text-sm text-amber-400">star</span>
+            <span class="material-icons text-sm text-amber-400">star</span>
+          </div>
+          <p class="text-xs text-gray-600 leading-relaxed mt-1">
+            Ulasan
+          </p>
+        </div>
+
+        <div class="p-4 border-b border-gray-100 last:border-0 flex flex-col gap-1.5 bg-gray-50/20 rounded-xl">
+          <div class="flex justify-between items-center">
+            <strong class="text-xs font-bold text-gray-800">Penghuni 2</strong>
+            <span class="text-[10px] text-gray-400 font-medium">15 Februari 2026</span>
+          </div>
+          <div class="flex items-center gap-0.5">
+            <span class="material-icons text-sm text-amber-400">star</span>
+            <span class="material-icons text-sm text-amber-400">star</span>
+            <span class="material-icons text-sm text-amber-400">star</span>
+            <span class="material-icons text-sm text-amber-400">star</span>
+            <span class="material-icons text-sm text-gray-200">star_border</span>
+          </div>
+          <p class="text-xs text-gray-600 leading-relaxed mt-1">
+            Ulasan
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+</body>
+</html>

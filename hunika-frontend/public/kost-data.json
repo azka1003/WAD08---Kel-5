@@ -1,0 +1,134 @@
+[
+  {
+    "id": 1,
+    "img": "/images-hunika/1.jpg",
+    "name": "Kost Melati Residence",
+    "loc": "Jakarta Selatan - Kebayoran Baru",
+    "price": "1.200.000",
+    "facilities": ["AC", "WiFi", "Parkir"],
+    "roomType": "Standar",
+    "rating": 4.5,
+    "description": "Kost nyaman dan bersih di kawasan strategis Kebayoran Baru. Dekat dengan pusat perbelanjaan, transportasi umum, dan berbagai fasilitas kota."
+  },
+  {
+    "id": 2,
+    "img": "/images-hunika/2.jpg",
+    "name": "Kost Bintaro Indah",
+    "loc": "Jakarta Selatan - Bintaro",
+    "price": "1.500.000",
+    "facilities": ["AC", "WiFi", "Parkir", "Kamar Mandi Dalam"],
+    "roomType": "Standar",
+    "rating": 4.7,
+    "description": "Kost modern dengan lingkungan nyaman dan akses mudah ke berbagai fasilitas umum."
+  },
+  {
+    "id": 3,
+    "img": "/images-hunika/3.jpg",
+    "name": "Kost Mawar Kemang",
+    "loc": "Jakarta Selatan - Kemang",
+    "price": "1.100.000",
+    "facilities": ["AC", "WiFi"],
+    "roomType": "Standar",
+    "rating": 4.5,
+    "description": "Kost dengan lingkungan nyaman dan lahan parkir yang lumayan luas."
+  },
+  {
+    "id": 4,
+    "img": "/images-hunika/4.jpg",
+    "name": "Kost Casabella",
+    "loc": "Jakarta Selatan - Pondok Indah",
+    "price": "2.000.000",
+    "facilities": ["AC", "WiFi", "Parkir", "Kamar Mandi Dalam"],
+    "roomType": "Deluxe",
+    "rating": 4.8,
+    "description": "Kost modern dengan lingkungan nyaman dan fasilitas yang lengkap."
+  },
+  {
+    "id": 5,
+    "img": "/images-hunika/5.jpg",
+    "name": "Kost Green",
+    "loc": "Jakarta Selatan - Cipete",
+    "price": "900.000",
+    "facilities": ["AC"],
+    "roomType": "Standar",
+    "rating": 4.4,
+    "description": "Kost nyaman dan akses mudah ke berbagai fasilitas umum."
+  },
+  {
+    "id": 6,
+    "img": "/images-hunika/6.jpg",
+    "name": "Kost Pesanggrahan Indah",
+    "loc": "Jakarta Selatan - Pesanggrahan",
+    "price": "1.800.000",
+    "facilities": ["AC", "WiFi", "Parkir", "Kamar Mandi Dalam"],
+    "roomType": "Deluxe",
+    "rating": 4.9,
+    "description": "Kost modern dengan lingkungan nyaman dan akses mudah ke berbagai fasilitas umum."
+  },
+  {
+    "id": 7,
+    "img": "/images-hunika/7.jpg",
+    "name": "Kost Tebet Hijau",
+    "loc": "Jakarta Selatan - Tebet",
+    "price": "1.600.000",
+    "facilities": ["AC", "WiFi", "Parkir", "Kamar Mandi Dalam"],
+    "roomType": "Deluxe",
+    "rating": 4.7,
+    "description": "Kamar minimalis full furnished, internet cepat, cocok kerja remote. Langsung tempati sekarang!"
+  },
+  {
+    "id": 8,
+    "img": "/images-hunika/8.jpg",
+    "name": "Kost Mama",
+    "loc": "Jakarta Selatan - Mampang",
+    "price": "1.000.000",
+    "facilities": ["AC", "Parkir"],
+    "roomType": "Standar",
+    "rating": 4.4,
+    "description": "Kost syariah dekat kantor, pembatasan tamu, suasana tenang & non-rokok."
+  },
+  {
+    "id": 9,
+    "img": "/images-hunika/9.jpg",
+    "name": "Kost Harmonika",
+    "loc": "Jakarta Selatan - Fatmawati",
+    "price": "1.300.000",
+    "facilities": ["AC", "Kamar Mandi Dalam"],
+    "roomType": "Standar",
+    "rating": 4.5,
+    "description": "Kost modern dengan lingkungan nyaman dan akses mudah ke berbagai fasilitas umum."
+  },
+  {
+    "id": 10,
+    "img": "/images-hunika/10.jpg",
+    "name": "Kost Senara",
+    "loc": "Jakarta Selatan - Senopati",
+    "price": "1.200.000",
+    "facilities": ["AC", "WiFi", "Parkir"],
+    "roomType": "Standar",
+    "rating": 4.8,
+    "description": "Kost nyaman & bersih, AC, lemari, dekat kampus/stasiun, biaya all-in, aman 24 jam."
+  },
+  {
+    "id": 11,
+    "img": "/images-hunika/11.jpg",
+    "name": "Kost Gandaria City",
+    "loc": "Jakarta Selatan - Gandaria",
+    "price": "2.400.000",
+    "facilities": ["AC", "WiFi", "Parkir", "Kamar Mandi Dalam", "Pantry"],
+    "roomType": "Eksklusif",
+    "rating": 5,
+    "description": "Kamar eksklusif dengan balkon, private bathroom, kulkas, TV, layanan laundry, dan Pantry."
+  },
+  {
+    "id": 12,
+    "img": "/images-hunika/12.jpg",
+    "name": "Kost Setia",
+    "loc": "Jakarta Selatan - Setiabudi",
+    "price": "2.300.000",
+    "facilities": ["AC", "WiFi", "Parkir", "Kamar Mandi Dalam", "Pantry"],
+    "roomType": "Eksklusif",
+    "rating": 5,
+    "description": "Kamar siap huni (full furnished) dengan fasilitas lengkap, area komunal yang nyaman, dan lingkungan yang tenang."
+  }
+]

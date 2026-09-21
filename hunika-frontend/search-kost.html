@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencarian Kost - Hunika</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100">
+
+<nav class="bg-white px-12 py-4 flex justify-between items-center shadow-md">
+    <div class="text-2xl font-bold text-green-600">Hunika</div>
+
+    <ul class="flex gap-8">
+        <li><a href="#" class="text-gray-700 hover:text-green-600">Cari Kost</a></li>
+        <li><a href="#" class="text-gray-700 hover:text-green-600">Dashboard Pemilik</a></li>
+        <li><a href="#" class="text-gray-700 hover:text-green-600">Favorit</a></li>
+    </ul>
+
+    <a href="login.html" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+        Login
+    </a>
+</nav>
+
+<section class="text-center py-16 px-5">
+    <h1 class="text-4xl font-bold mb-3">
+        Cari Kost yang Nyaman dan Terjangkau
+    </h1>
+
+    <p class="text-gray-500 mb-6">
+        Temukan kost impianmu dengan mudah.
+    </p>
+
+    <div class="flex justify-center gap-3">
+        <input type="text" id="search-input"
+            placeholder="Cari lokasi, nama kost, atau fasilitas..."
+            class="w-[500px] p-3 border border-gray-300 rounded-lg"
+            oninput="filterKost()">
+
+        <button onclick="filterKost()" class="bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700">
+            Cari
+        </button>
+    </div>
+</section>
+
+<!--MAIN-->
+<div class="flex gap-6 px-10 pb-10">
+
+    <!-- FILTER -->
+    <aside class="w-64 self-start bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+
+        <h2 class="text-gray-400 font-bold uppercase text-sm mb-5">
+            Filter
+        </h2>
+
+        <!-- Fasilitas -->
+        <div class="mb-6">
+            <h3 class="font-semibold text-gray-800 mb-3">Fasilitas</h3>
+
+            <div class="space-y-2 text-gray-600">
+                <label class="flex items-center gap-2"><input type="checkbox"> KM Dalam</label>
+=======
+                <label class="flex items-center gap-2"><input type="checkbox" class="filter-fas" value="AC" onchange="filterKost()"> AC</label>
+                <label class="flex items-center gap-2"><input type="checkbox" class="filter-fas" value="WiFi" onchange="filterKost()"> WiFi</label>
+                <label class="flex items-center gap-2"><input type="checkbox" class="filter-fas" value="Parkir" onchange="filterKost()"> Parkir</label>
+                <label class="flex items-center gap-2"><input type="checkbox" class="filter-fas" value="KM Dalam" onchange="filterKost()"> KM Dalam</label>
+>>>>>>> origin/fitur-transaksi
+            </div>
+        </div>
+
+        <!-- Tipe -->
+        <div class="mb-6">
+            <h3 class="font-semibold text-gray-800 mb-3">Tipe Kamar</h3>
+
+            <div class="space-y-2 text-gray-600">
+                <label class="flex items-center gap-2"><input type="radio" name="tipe" value="Standar" onchange="filterKost()"> Standar</label>
+                <label class="flex items-center gap-2"><input type="radio" name="tipe" value="Deluxe" onchange="filterKost()"> Deluxe</label>
+                <label class="flex items-center gap-2"><input type="radio" name="tipe" value="Eksklusif" onchange="filterKost()"> Eksklusif</label>
+                <label class="flex items-center gap-2"><input type="radio" name="tipe" value="" checked onchange="filterKost()"> Semua</label>
+            </div>
+        </div>
+
+        <!-- Harga -->
+        <div class="mb-6">
+            <h3 class="font-semibold text-gray-800 mb-3">Harga Maks (Rp)</h3>
+
+            <input type="number" id="max-price"
+                placeholder="cth: 2000000"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3"
+                oninput="filterKost()">
+        </div>
+
+        <button onclick="resetFilter()" class="w-full bg-gray-100 hover:bg-gray-200 py-3 rounded-full">
+            ↺ Reset Filter
+        </button>
+
+    </aside>
+
+    <!-- LIST KOST -->
+    <main class="flex-1">
+        <div id="kost-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Kartu kost dirender oleh JavaScript -->
+        </div>
+        <div id="no-result" class="hidden text-center py-20 text-gray-400">
+            <p class="text-xl font-semibold">Kost tidak ditemukan</p>
+            <p class="text-sm mt-2">Coba ubah filter atau kata kunci pencarian</p>
+        </div>
+    </main>
+
+</div>
+
+<!-- Data terpusat -->
+<script src="data-kost.js"></script>
+
+<script>
+// ── Render semua kartu kost ──────────────────────────────────────
+function renderKost(list) {
+  const grid = document.getElementById('kost-grid');
+  const noResult = document.getElementById('no-result');
+
+  if (list.length === 0) {
+    grid.innerHTML = '';
+    noResult.classList.remove('hidden');
+    return;
+  }
+
+  noResult.classList.add('hidden');
+  grid.innerHTML = list.map(({ id, k }) => `
+    <a href="detail-kost.html?id=${id}"
+       onclick="saveKostId(${id})"
+       class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer block">
+      <img src="${k.photo}" alt="${k.name}" class="w-full h-52 object-cover">
+      <div class="p-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="bg-blue-50 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded-full">${k.type}</span>
+          <span class="bg-purple-50 text-purple-600 text-xs font-semibold px-2 py-0.5 rounded-full">${k.tier}</span>
+        </div>
+        <h3 class="font-semibold text-lg mb-1">${k.name}</h3>
+        <p class="text-gray-500 mb-1 text-sm">📍 ${k.area}</p>
+        <div class="flex items-center gap-1 mb-2">
+          <span class="text-yellow-400 text-sm">${k.stars}</span>
+          <span class="text-sm font-semibold text-gray-700">${k.rating}</span>
+          <span class="text-xs text-gray-400">(${k.reviews} ulasan)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-green-600">${fmt(k.price)} / bulan</span>
+          <span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-lg">Lihat Detail</span>
+        </div>
+      </div>
+    </a>
+  `).join('');
+}
+
+// ── Filter & pencarian ───────────────────────────────────────────
+function filterKost() {
+  const keyword  = document.getElementById('search-input').value.toLowerCase();
+  const maxPrice = parseInt(document.getElementById('max-price').value) || Infinity;
+  const tipeEl   = document.querySelector('input[name="tipe"]:checked');
+  const tipe     = tipeEl ? tipeEl.value : '';
+  const fasChecked = [...document.querySelectorAll('.filter-fas:checked')].map(cb => cb.value);
+
+  const result = DATA.map((k, i) => ({ id: i + 1, k })).filter(({ k }) => {
+    // keyword
+    if (keyword && !k.name.toLowerCase().includes(keyword) && !k.area.toLowerCase().includes(keyword)) return false;
+    // harga
+    if (k.price > maxPrice) return false;
+    // tipe kamar
+    if (tipe && !k.roomTypes.some(r => r.name.toLowerCase().includes(tipe.toLowerCase()))) return false;
+    // fasilitas
+    if (fasChecked.length > 0) {
+      const allFas = [...k.fasKamar, ...k.fasUmum].join(' ').toLowerCase();
+      if (!fasChecked.every(f => allFas.includes(f.toLowerCase()))) return false;
+    }
+    return true;
+  });
+
+  renderKost(result);
+}
+
+function resetFilter() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('max-price').value = '';
+  document.querySelector('input[name="tipe"][value=""]').checked = true;
+  document.querySelectorAll('.filter-fas').forEach(cb => cb.checked = false);
+  filterKost();
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+filterKost();
+</script>
+
+</body>
+</html>

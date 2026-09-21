@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunika - Tambah Kos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <nav class="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">H</div>
+            <span class="text-emerald-600 font-bold text-xl tracking-wide">Hunika</span>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <a href="#" class="text-sm text-gray-500 hover:text-emerald-600">Dashboard</a>
+            <a href="#" class="text-sm text-emerald-500 hover:text-emerald-700">Dashboard Pemilik</a>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button class="px-4 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-700">Owner Panel</button>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6 py-10">
+        
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <a href="dashboard.html" class="text-xm text-gray-400 font-semibold hover:text-emerald-600 flex items-center gap-1 mb-1">Kembali ke Dashboard</a>
+                <h1 class="text-xl font-bold text-gray-900">Tambah Kos Baru</h1>
+            </div>
+            <button class="px-5 py-2 bg-emerald-500 text-white text-xs font-semibold rounded-xl hover:bg-emerald-600 transition shadow-sm">
+                Simpan Info Kos
+            </button>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-6">
+            <div>
+                <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-4">1. Informasi Umum</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="text-xs font-medium text-gray-400 block mb-1.5">Input Nama Kos</label>
+                        <input type="text" placeholder="Nama Kos" class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs font-medium text-gray-400 block mb01.5">Wilayah</label>
+                        <select class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 text-gray-600 transition">
+                            <option>Jakarta Selatan</option>
+                            <option>Jakarta Barat</option>
+                            <option>Jakarta Timur</option>
+                            <option>Jakarta Pusat</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-medium text-gray-400 block mb-1.5">Harga Sewa Bulanan</label>
+                        <input type="number" placeholder="Input Harga" class="w-full px-3 py-2 text-xm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                </div>
+            </div>
+            <hr class="border-gray-100">
+
+            <div>
+                <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-3">2. Fasilitas Kos </h2>
+
+                <div class="flex flex-wrap gap-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" class="w-4 h-4 accent-emerald-500 rounded border border-gray-300">
+                        <span class="text-xs text-gray-600 font-medium">Free Wi-Fi</span>
+                    </label>
+
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" class="w-4 h-4 accent-emerald-500 rounded border border-gray-300">
+                        <span class="text-xs text-gray-600 font-medium">Pendingin Ruangan (AC)</span>
+                    </label>
+
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" class="w-4 h-4 accent-emerald-500 rounded border border-gray-300">
+                        <span class="text-xs text-gray-600 font-medium">Kamar Mandi Dalam</span>
+                    </label>
+
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" class="w-4 h-4 accent-emerald-500 rounded border border-gray-300">
+                        <span class="text-xs text-gray-600 font-medium">Kasur & Lemari</span>
+                    </label>
+
+                </div>
+            </div>
+            <hr class="border-gray-100">
+
+            <div>
+                <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-3">3. Upload Gambar</h2>
+
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50/50 flex flex-col items-center justify-center text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/10 transition group">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-lg font-bold group-hover:bg-emerald-500 group-hover:text-white transition mb-2"> + </div>
+                    <p class="text-xs font-semibold text-gray-600">Unggah Gambar Kos</p>
+                    <p class="text-[10-px] text-gray-400 mt-1">PNG, JPG, atau JPEG</p>
+                    <input type="file" class="hidden">
+                </div>
+            </div>
+            <hr class="border-gray-100">
+
+            <div>
+                <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider">4. Deskripsi Lengkap</h2>
+
+                <div>
+                    <label class="text-xs font-medium text-gray-400 block mb-1.5">Berikan Informasi Lengkap Kos Disini</label>
+                    <textarea rows="10" placeholder="Tulis Deskripsi Lengkap..." class="w-full px-4 py-4 text-sm bg-gray-50 border border-gray-200 rounded 2xl focus:outlinen-none focus:border-emerald-500 text-gray-700 leading-relaxed transition shadow-inner resize-y "></textarea>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

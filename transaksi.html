@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transaksi Pembayaran | Hunika</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .pay-tab { transition: all .2s; cursor: pointer; }
+    .pay-tab.active { border-color: #10b981; background: #f0fdf4; color: #065f46; }
+    .pay-tab:hover:not(.active) { border-color: #a7f3d0; background: #f9fffe; }
+    .method-panel { display: none; }
+    .method-panel.active { display: block; }
+    .upload-zone { border: 2px dashed #d1d5db; transition: all .2s; cursor: pointer; }
+    .upload-zone:hover { border-color: #10b981; background: #f0fdf4; }
+    .upload-zone.has-file { border-color: #10b981; background: #f0fdf4; border-style: solid; }
+    #success-screen { display: none; }
+    #success-screen.show { display: flex; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; }
+      #invoice-content { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+    }
+    .copy-btn { transition: all .2s; }
+    .copy-btn.copied { background: #d1fae5; color: #065f46; }
+    .step-active   { background: #10b981; color: white; border-color: #10b981; }
+    .step-done     { background: #d1fae5; color: #065f46; border-color: #10b981; }
+    .step-inactive { background: white; color: #9ca3af; border-color: #e5e7eb; }
+    .bank-btn.active { border-color: #10b981; background: #f0fdf4; }
+    input:focus, select:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+  </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+
+<!-- Data terpusat -->
+<script src="data-kost.js"></script>
+
+<!-- NAVBAR -->
+<nav class="bg-white border-b border-gray-200 px-6 md:px-10 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm no-print">
+  <a href="search-kost.html" class="text-2xl font-extrabold text-green-600 tracking-tight">HUNIKA</a>
+  <ul class="hidden md:flex gap-8 text-sm font-medium text-gray-600">
+    <li><a href="search-kost.html" class="hover:text-green-600 transition">Cari Kost</a></li>
+    <li><a href="#" class="hover:text-green-600 transition">Dashboard Pemilik</a></li>
+    <li><a href="#" class="hover:text-green-600 transition">Favorit</a></li>
+  </ul>
+  <a id="back-to-booking" href="booking.html" class="flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 transition font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali ke Booking
+  </a>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="max-w-6xl mx-auto px-6 pt-5 pb-2 no-print">
+  <nav class="flex items-center gap-2 text-sm text-gray-400">
+    <a href="search-kost.html" class="hover:text-green-600 transition">Beranda</a>
+    <span>/</span>
+    <a id="bc-detail" href="detail-kost.html" class="hover:text-green-600 transition">Detail Kost</a>
+    <span>/</span>
+    <a id="bc-booking" href="booking.html" class="hover:text-green-600 transition">Booking</a>
+    <span>/</span>
+    <span class="text-gray-700 font-medium">Pembayaran</span>
+  </nav>
+</div>
+
+<!-- STEP INDICATOR -->
+<div class="max-w-6xl mx-auto px-6 py-5 no-print">
+  <div class="flex items-center justify-center gap-0 max-w-lg mx-auto">
+    <div class="flex flex-col items-center">
+      <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm step-done">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <span class="text-xs mt-1 font-semibold text-green-600">Data Diri</span>
+    </div>
+    <div class="flex-1 h-0.5 mb-4 mx-2" style="background:#10b981"></div>
+    <div class="flex flex-col items-center">
+      <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm step-done">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <span class="text-xs mt-1 font-semibold text-green-600">Konfirmasi</span>
+    </div>
+    <div class="flex-1 h-0.5 mb-4 mx-2" style="background:#10b981"></div>
+    <div class="flex flex-col items-center">
+      <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm step-active">3</div>
+      <span class="text-xs mt-1 font-semibold text-green-700">Pembayaran</span>
+    </div>
+  </div>
+</div>
+
+<!-- COUNTDOWN BANNER -->
+<div class="max-w-6xl mx-auto px-6 mb-5 no-print">
+  <div class="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div>
+        <p class="text-sm font-bold text-amber-800">Selesaikan pembayaran sebelum waktu habis</p>
+        <p class="text-xs text-amber-600 mt-0.5">Booking akan dibatalkan otomatis jika melewati batas waktu</p>
+      </div>
+    </div>
+    <div class="flex-shrink-0">
+      <div class="bg-amber-600 text-white font-extrabold text-2xl px-6 py-2 rounded-xl tracking-widest" id="countdown-display">23:59:59</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="max-w-6xl mx-auto px-6 pb-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+  <!-- LEFT: PAYMENT & DETAIL -->
+  <div class="lg:col-span-2 space-y-6">
+
+    <!-- RINGKASAN TRANSAKSI -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-bold text-gray-800">Detail Transaksi</h2>
+        <span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">Menunggu Pembayaran</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Kost Info -->
+        <div class="flex gap-3">
+          <img id="tx-photo" src="" alt="" class="w-20 h-16 object-cover rounded-xl flex-shrink-0" />
+          <div>
+            <h3 id="tx-name" class="font-bold text-gray-800 text-sm"></h3>
+            <p id="tx-area" class="text-xs text-gray-500 mt-0.5"></p>
+            <p class="text-xs text-gray-500 mt-0.5">Kamar: <span id="tx-room" class="font-semibold text-gray-700"></span></p>
+          </div>
+        </div>
+        <!-- Booking Info -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-500">No. Booking</span>
+            <span class="font-bold text-gray-800" id="booking-id"></span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-500">Tanggal Masuk</span>
+            <span class="font-semibold text-gray-800" id="tx-checkin"></span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-500">Durasi</span>
+            <span class="font-semibold text-gray-800" id="tx-duration"></span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-500">Penyewa</span>
+            <span class="font-semibold text-gray-800" id="tx-penyewa"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- METODE PEMBAYARAN -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="text-base font-bold text-gray-800 mb-4">Pilih Metode Pembayaran</h2>
+
+      <div class="flex gap-2 flex-wrap mb-5">
+        <button class="pay-tab border-2 rounded-xl px-4 py-2 text-sm font-bold active" id="tab-qris"    onclick="switchPayCat('qris')">QRIS</button>
+        <button class="pay-tab border-2 rounded-xl px-4 py-2 text-sm font-bold"        id="tab-bank"    onclick="switchPayCat('bank')">Transfer Bank</button>
+        <button class="pay-tab border-2 rounded-xl px-4 py-2 text-sm font-bold"        id="tab-ewallet" onclick="switchPayCat('ewallet')">E-Wallet</button>
+      </div>
+
+      <!-- PANEL: QRIS -->
+      <div id="panel-qris" class="method-panel active">
+        <div class="flex flex-col md:flex-row gap-6 items-center">
+          <div class="flex-shrink-0">
+            <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 w-56 h-56 flex items-center justify-center shadow-sm">
+              <svg viewBox="0 0 100 100" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="5" width="30" height="30" rx="3" fill="none" stroke="#1f2937" stroke-width="3"/>
+                <rect x="10" y="10" width="20" height="20" rx="1" fill="#1f2937"/>
+                <rect x="65" y="5" width="30" height="30" rx="3" fill="none" stroke="#1f2937" stroke-width="3"/>
+                <rect x="70" y="10" width="20" height="20" rx="1" fill="#1f2937"/>
+                <rect x="5" y="65" width="30" height="30" rx="3" fill="none" stroke="#1f2937" stroke-width="3"/>
+                <rect x="10" y="70" width="20" height="20" rx="1" fill="#1f2937"/>
+                <rect x="40" y="5"  width="5" height="5" fill="#1f2937"/>
+                <rect x="50" y="5"  width="5" height="5" fill="#1f2937"/>
+                <rect x="55" y="10" width="5" height="5" fill="#1f2937"/>
+                <rect x="40" y="15" width="5" height="5" fill="#1f2937"/>
+                <rect x="45" y="20" width="5" height="5" fill="#1f2937"/>
+                <rect x="55" y="20" width="5" height="5" fill="#1f2937"/>
+                <rect x="40" y="25" width="5" height="5" fill="#1f2937"/>
+                <rect x="50" y="30" width="5" height="5" fill="#1f2937"/>
+                <rect x="5"  y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="15" y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="25" y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="40" y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="50" y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="60" y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="70" y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="80" y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="90" y="40" width="5" height="5" fill="#1f2937"/>
+                <rect x="10" y="45" width="5" height="5" fill="#1f2937"/>
+                <rect x="20" y="45" width="5" height="5" fill="#1f2937"/>
+                <rect x="35" y="45" width="5" height="5" fill="#1f2937"/>
+                <rect x="45" y="45" width="5" height="5" fill="#1f2937"/>
+                <rect x="55" y="45" width="5" height="5" fill="#1f2937"/>
+                <rect x="65" y="45" width="5" height="5" fill="#1f2937"/>
+                <rect x="75" y="45" width="5" height="5" fill="#1f2937"/>
+                <rect x="85" y="45" width="5" height="5" fill="#1f2937"/>
+                <rect x="5"  y="50" width="5" height="5" fill="#1f2937"/>
+                <rect x="30" y="50" width="5" height="5" fill="#1f2937"/>
+                <rect x="40" y="50" width="5" height="5" fill="#1f2937"/>
+                <rect x="60" y="50" width="5" height="5" fill="#1f2937"/>
+                <rect x="80" y="50" width="5" height="5" fill="#1f2937"/>
+                <rect x="90" y="50" width="5" height="5" fill="#1f2937"/>
+                <rect x="10" y="55" width="5" height="5" fill="#1f2937"/>
+                <rect x="20" y="55" width="5" height="5" fill="#1f2937"/>
+                <rect x="45" y="55" width="5" height="5" fill="#1f2937"/>
+                <rect x="55" y="55" width="5" height="5" fill="#1f2937"/>
+                <rect x="70" y="55" width="5" height="5" fill="#1f2937"/>
+                <rect x="85" y="55" width="5" height="5" fill="#1f2937"/>
+                <rect x="40" y="60" width="5" height="5" fill="#1f2937"/>
+                <rect x="50" y="60" width="5" height="5" fill="#1f2937"/>
+                <rect x="60" y="65" width="5" height="5" fill="#1f2937"/>
+                <rect x="75" y="65" width="5" height="5" fill="#1f2937"/>
+                <rect x="90" y="65" width="5" height="5" fill="#1f2937"/>
+                <rect x="40" y="70" width="5" height="5" fill="#1f2937"/>
+                <rect x="55" y="70" width="5" height="5" fill="#1f2937"/>
+                <rect x="65" y="70" width="5" height="5" fill="#1f2937"/>
+                <rect x="80" y="70" width="5" height="5" fill="#1f2937"/>
+                <rect x="40" y="80" width="5" height="5" fill="#1f2937"/>
+                <rect x="50" y="80" width="5" height="5" fill="#1f2937"/>
+                <rect x="65" y="80" width="5" height="5" fill="#1f2937"/>
+                <rect x="75" y="80" width="5" height="5" fill="#1f2937"/>
+                <rect x="90" y="80" width="5" height="5" fill="#1f2937"/>
+                <rect x="40" y="90" width="5" height="5" fill="#1f2937"/>
+                <rect x="55" y="90" width="5" height="5" fill="#1f2937"/>
+                <rect x="70" y="90" width="5" height="5" fill="#1f2937"/>
+                <rect x="85" y="90" width="5" height="5" fill="#1f2937"/>
+                <rect x="43" y="43" width="14" height="14" rx="2" fill="white" stroke="#10b981" stroke-width="1.5"/>
+                <text x="50" y="53" text-anchor="middle" font-size="5" font-weight="bold" fill="#10b981">HK</text>
+              </svg>
+            </div>
+            <p class="text-xs text-center text-gray-400 mt-2">Scan dengan aplikasi pembayaran</p>
+          </div>
+          <div class="flex-1 space-y-4">
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">Bayar dengan QRIS</h3>
+              <p class="text-sm text-gray-500 leading-relaxed">Scan QR Code menggunakan aplikasi e-wallet atau mobile banking favoritmu.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg">GoPay</span>
+              <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg">OVO</span>
+              <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg">DANA</span>
+              <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg">ShopeePay</span>
+              <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg">BCA Mobile</span>
+              <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg">LinkAja</span>
+            </div>
+            <div class="bg-green-50 border border-green-100 rounded-xl p-3">
+              <p class="text-xs text-green-700 font-semibold mb-1">Nominal Pembayaran</p>
+              <p class="text-2xl font-extrabold text-green-600" id="qris-total">–</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+              <ol class="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                <li>Buka aplikasi pembayaran di smartphone kamu</li>
+                <li>Pilih menu "Scan QR" atau "Bayar"</li>
+                <li>Arahkan kamera ke QR Code di atas</li>
+                <li>Periksa detail pembayaran dan konfirmasi</li>
+                <li>Simpan bukti pembayaran dan upload di bawah</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL: TRANSFER BANK -->
+      <div id="panel-bank" class="method-panel">
+        <p class="text-sm text-gray-500 mb-4">Pilih bank tujuan transfer:</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <button class="bank-btn border-2 border-green-500 bg-green-50 rounded-xl py-3 px-2 text-center transition active" onclick="selectBank(this,'BCA','88081234567890')">
+            <div class="font-extrabold text-lg text-blue-700">BCA</div><div class="text-xs text-gray-400 mt-0.5">Virtual Account</div>
+          </button>
+          <button class="bank-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-center transition" onclick="selectBank(this,'BNI','88081234567891')">
+            <div class="font-extrabold text-lg text-orange-600">BNI</div><div class="text-xs text-gray-400 mt-0.5">Virtual Account</div>
+          </button>
+          <button class="bank-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-center transition" onclick="selectBank(this,'BRI','88081234567892')">
+            <div class="font-extrabold text-lg text-blue-600">BRI</div><div class="text-xs text-gray-400 mt-0.5">Virtual Account</div>
+          </button>
+          <button class="bank-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-center transition" onclick="selectBank(this,'Mandiri','88081234567893')">
+            <div class="font-extrabold text-lg text-yellow-600">Mandiri</div><div class="text-xs text-gray-400 mt-0.5">Virtual Account</div>
+          </button>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-5">
+          <h3 class="font-bold text-gray-800 mb-3">Informasi Transfer <span id="selected-bank-name">BCA</span></h3>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center py-2 border-b border-gray-200">
+              <span class="text-sm text-gray-500">Bank Tujuan</span>
+              <span class="font-bold text-gray-800" id="bank-name-display">Bank BCA</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-gray-200">
+              <span class="text-sm text-gray-500">Nomor Virtual Account</span>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-gray-800 text-lg tracking-wider" id="va-number">88081234567890</span>
+                <button onclick="copyVA()" class="copy-btn text-xs bg-green-100 text-green-700 px-2 py-1 rounded-lg font-semibold hover:bg-green-200 transition" id="copy-va-btn">Salin</button>
+              </div>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-gray-200">
+              <span class="text-sm text-gray-500">Atas Nama</span>
+              <span class="font-bold text-gray-800">HUNIKA Indonesia</span>
+            </div>
+            <div class="flex justify-between items-center py-2">
+              <span class="text-sm text-gray-500">Nominal Transfer</span>
+              <span class="font-extrabold text-green-600 text-lg" id="bank-total">–</span>
+            </div>
+          </div>
+          <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <p class="text-xs text-amber-700 font-medium">Transfer tepat sesuai nominal. Perbedaan 1 rupiah pun dapat menghambat verifikasi otomatis.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL: E-WALLET -->
+      <div id="panel-ewallet" class="method-panel">
+        <p class="text-sm text-gray-500 mb-4">Pilih e-wallet yang ingin digunakan:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="border-2 border-gray-200 rounded-2xl p-5 hover:border-purple-400 transition cursor-pointer" onclick="selectEwallet(this,'OVO','0812-3456-7890')">
+            <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0"><span class="text-white font-extrabold text-sm">OVO</span></div><div><div class="font-bold text-gray-800">OVO</div><div class="text-xs text-gray-400">Transfer ke nomor</div></div></div>
+            <div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500">Nomor OVO</p><p class="font-bold text-gray-800 text-sm">0812-3456-7890</p></div>
+          </div>
+          <div class="border-2 border-gray-200 rounded-2xl p-5 hover:border-blue-400 transition cursor-pointer" onclick="selectEwallet(this,'DANA','0812-3456-7891')">
+            <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0"><span class="text-white font-extrabold text-sm">DA</span></div><div><div class="font-bold text-gray-800">DANA</div><div class="text-xs text-gray-400">Transfer ke nomor</div></div></div>
+            <div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500">Nomor DANA</p><p class="font-bold text-gray-800 text-sm">0812-3456-7891</p></div>
+          </div>
+          <div class="border-2 border-gray-200 rounded-2xl p-5 hover:border-green-400 transition cursor-pointer" onclick="selectEwallet(this,'GoPay','0812-3456-7892')">
+            <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0"><span class="text-white font-extrabold text-xs">GPAY</span></div><div><div class="font-bold text-gray-800">GoPay</div><div class="text-xs text-gray-400">Transfer ke nomor</div></div></div>
+            <div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500">Nomor GoPay</p><p class="font-bold text-gray-800 text-sm">0812-3456-7892</p></div>
+          </div>
+          <div class="border-2 border-gray-200 rounded-2xl p-5 hover:border-orange-400 transition cursor-pointer" onclick="selectEwallet(this,'ShopeePay','0812-3456-7893')">
+            <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center flex-shrink-0"><span class="text-white font-extrabold text-xs">SPay</span></div><div><div class="font-bold text-gray-800">ShopeePay</div><div class="text-xs text-gray-400">Transfer ke nomor</div></div></div>
+            <div class="bg-gray-50 rounded-xl p-3"><p class="text-xs text-gray-500">Nomor ShopeePay</p><p class="font-bold text-gray-800 text-sm">0812-3456-7893</p></div>
+          </div>
+        </div>
+        <div id="ewallet-info" class="hidden mt-4 bg-green-50 border border-green-200 rounded-2xl p-4">
+          <h3 class="font-bold text-green-800 mb-2">Transfer ke <span id="ewallet-name">OVO</span></h3>
+          <div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Nomor Tujuan</span><span class="font-bold text-gray-800" id="ewallet-number">0812-3456-7890</span></div>
+          <div class="flex justify-between text-sm"><span class="text-gray-600">Nominal</span><span class="font-extrabold text-green-600" id="ewallet-total">–</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD BUKTI -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="text-base font-bold text-gray-800 mb-2">Upload Bukti Pembayaran</h2>
+      <p class="text-sm text-gray-500 mb-4">Upload screenshot atau foto bukti transfer. Format: JPG, PNG, PDF. Maks 5MB.</p>
+      <div class="upload-zone rounded-2xl p-8 text-center" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <input type="file" id="file-input" accept="image/*,.pdf" class="hidden" onchange="handleFileUpload(event)" />
+        <div id="upload-placeholder">
+          <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+          <p class="text-sm font-semibold text-gray-700 mb-1">Klik atau drag & drop file bukti pembayaran</p>
+          <p class="text-xs text-gray-400">JPG, PNG, PDF – Maks 5MB</p>
+        </div>
+        <div id="upload-preview" class="hidden">
+          <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <p class="text-sm font-semibold text-green-700 mb-1" id="file-name">nama-file.jpg</p>
+          <p class="text-xs text-gray-400" id="file-size">0 KB</p>
+          <button onclick="removeFile(event)" class="mt-2 text-xs text-red-500 hover:underline">Hapus file</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOMBOL KONFIRMASI -->
+    <div>
+      <button id="confirm-btn" onclick="confirmPayment()"
+        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl transition text-base shadow-sm">
+        Konfirmasi Pembayaran
+      </button>
+      <p class="text-xs text-gray-400 text-center mt-3">Tim kami akan memverifikasi pembayaran dalam 1×24 jam</p>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: RINGKASAN -->
+  <div class="lg:col-span-1 no-print">
+    <div class="sticky top-24 space-y-4">
+
+      <!-- Order Summary -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-bold text-gray-800 mb-4">Ringkasan Pembayaran</h3>
+        <!-- Foto kost kecil -->
+        <div class="flex gap-3 mb-4">
+          <img id="sidebar-photo" src="" alt="" class="w-16 h-12 object-cover rounded-xl flex-shrink-0" />
+          <div>
+            <p id="sidebar-name" class="font-bold text-gray-800 text-sm"></p>
+            <p id="sidebar-area" class="text-xs text-gray-400"></p>
+          </div>
+        </div>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-gray-500">No. Booking</span><span class="font-bold text-gray-800" id="sidebar-booking-id"></span></div>
+          <div class="flex justify-between"><span class="text-gray-500">Kamar</span><span class="font-semibold text-gray-800" id="sidebar-room"></span></div>
+          <div class="flex justify-between"><span class="text-gray-500">Durasi</span><span class="font-semibold text-gray-800" id="sidebar-duration"></span></div>
+        </div>
+        <div class="border-t border-gray-100 mt-4 pt-4 space-y-2">
+          <div class="flex justify-between text-sm"><span class="text-gray-500">Biaya Sewa</span><span class="font-semibold" id="sidebar-rent"></span></div>
+          <div id="sidebar-discount-row" class="flex justify-between text-sm hidden"><span class="text-green-600">Diskon</span><span class="font-semibold text-green-600" id="sidebar-discount"></span></div>
+          <div class="flex justify-between text-sm"><span class="text-gray-500">Biaya Admin</span><span class="font-semibold">Rp 50.000</span></div>
+          <div class="flex justify-between text-sm"><span class="text-gray-500">Deposit</span><span class="font-semibold">Rp 400.000</span></div>
+        </div>
+        <div class="border-t-2 border-green-200 mt-3 pt-3 flex justify-between items-baseline">
+          <span class="font-bold text-gray-800">Total</span>
+          <span class="text-2xl font-extrabold text-green-600" id="sidebar-total"></span>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-3 h-3 rounded-full bg-amber-500 animate-pulse flex-shrink-0"></div>
+          <span class="text-sm font-bold text-amber-800">Menunggu Pembayaran</span>
+        </div>
+        <p class="text-xs text-amber-600">Selesaikan pembayaran sebelum countdown habis untuk mengamankan kamar pilihanmu.</p>
+      </div>
+
+      <!-- Bantuan -->
+      <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+        <h4 class="text-sm font-bold text-gray-800 mb-2">Bantuan Pembayaran</h4>
+        <p class="text-xs text-gray-500 mb-2">Jika mengalami kendala pembayaran, hubungi kami:</p>
+        <a href="https://wa.me/628123456789" class="flex items-center gap-2 text-green-600 text-sm font-semibold hover:underline">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          Chat WhatsApp
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SUCCESS SCREEN                                               -->
+<!-- ============================================================ -->
+<div id="success-screen" class="fixed inset-0 bg-white z-[100] flex-col overflow-y-auto">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+
+    <div class="text-center mb-8">
+      <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg">
+        <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Pembayaran Berhasil!</h1>
+      <p class="text-gray-500 text-base">Terima kasih! Bukti pembayaran kamu sudah kami terima dan sedang diverifikasi.</p>
+      <div class="mt-4 inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-bold">
+        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+        Verifikasi dalam proses (1×24 jam)
+      </div>
+    </div>
+
+    <!-- INVOICE -->
+    <div id="invoice-content" class="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden mb-6">
+      <div class="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6 text-white">
+        <div class="flex items-center justify-between">
+          <div><div class="text-2xl font-extrabold tracking-tight">HUNIKA</div><div class="text-green-200 text-sm mt-1">Platform Booking Kost Terpercaya</div></div>
+          <div class="text-right"><div class="text-green-200 text-sm">Invoice</div><div class="font-extrabold text-xl" id="invoice-number"></div></div>
+        </div>
+      </div>
+
+      <div class="p-8">
+        <div class="grid grid-cols-2 gap-8 mb-8">
+          <div>
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Detail Booking</h3>
+            <div class="space-y-2 text-sm">
+              <div><span class="text-gray-500">No. Booking</span><br/><span class="font-bold text-gray-800" id="inv-booking-id"></span></div>
+              <div><span class="text-gray-500">Tanggal Transaksi</span><br/><span class="font-bold text-gray-800" id="inv-date"></span></div>
+              <div><span class="text-gray-500">Status</span><br/><span class="inline-flex items-center gap-1 font-bold text-green-700 text-xs bg-green-100 px-2 py-0.5 rounded-full">Dibayar</span></div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Data Penyewa</h3>
+            <div class="space-y-2 text-sm">
+              <div><span class="text-gray-500">Nama</span><br/><span class="font-bold text-gray-800" id="inv-nama"></span></div>
+              <div><span class="text-gray-500">Email</span><br/><span class="font-bold text-gray-800" id="inv-email"></span></div>
+              <div><span class="text-gray-500">Telepon</span><br/><span class="font-bold text-gray-800" id="inv-phone"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-5 mb-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Detail Kost</h3>
+          <div class="flex gap-4">
+            <img id="inv-photo" src="" alt="" class="w-20 h-16 object-cover rounded-xl flex-shrink-0" />
+            <div class="grid grid-cols-2 gap-x-8 gap-y-1.5 text-sm flex-1">
+              <div><span class="text-gray-500">Nama Kost</span><br/><span class="font-bold text-gray-800" id="inv-kost-name"></span></div>
+              <div><span class="text-gray-500">Lokasi</span><br/><span class="font-bold text-gray-800" id="inv-kost-area"></span></div>
+              <div><span class="text-gray-500">Tipe Kamar</span><br/><span class="font-bold text-gray-800" id="inv-room"></span></div>
+              <div><span class="text-gray-500">Durasi Sewa</span><br/><span class="font-bold text-gray-800" id="inv-duration"></span></div>
+              <div><span class="text-gray-500">Tanggal Masuk</span><br/><span class="font-bold text-gray-800" id="inv-checkin"></span></div>
+              <div><span class="text-gray-500">Tanggal Keluar</span><br/><span class="font-bold text-gray-800" id="inv-checkout"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Rincian Biaya</h3>
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm py-2 border-b border-gray-100"><span class="text-gray-600">Biaya Sewa</span><span class="font-semibold" id="inv-rent"></span></div>
+            <div id="inv-discount-row" class="hidden flex justify-between text-sm py-2 border-b border-gray-100"><span class="text-green-600">Diskon</span><span class="font-semibold text-green-600" id="inv-discount"></span></div>
+            <div class="flex justify-between text-sm py-2 border-b border-gray-100"><span class="text-gray-600">Biaya Admin</span><span class="font-semibold">Rp 50.000</span></div>
+            <div class="flex justify-between text-sm py-2 border-b border-gray-100"><span class="text-gray-600">Deposit (refundable)</span><span class="font-semibold">Rp 400.000</span></div>
+          </div>
+          <div class="flex justify-between items-center mt-3 pt-3 border-t-2 border-green-200">
+            <span class="font-bold text-gray-800 text-base">Total Dibayar</span>
+            <span class="text-2xl font-extrabold text-green-600" id="inv-total"></span>
+          </div>
+        </div>
+
+        <div class="bg-green-50 border border-green-100 rounded-xl p-4 flex justify-between items-center">
+          <div><p class="text-xs text-gray-500 mb-0.5">Metode Pembayaran</p><p class="font-bold text-gray-800" id="inv-method">QRIS</p></div>
+          <div class="text-right"><p class="text-xs text-gray-500 mb-0.5">Waktu Bayar</p><p class="font-bold text-gray-800" id="inv-time"></p></div>
+        </div>
+      </div>
+
+      <div class="bg-gray-50 border-t border-gray-200 px-8 py-4 text-center">
+        <p class="text-xs text-gray-400">© 2024 HUNIKA · Jakarta Selatan · hunika@gmail.com · +62 812-3456-7890</p>
+        <p class="text-xs text-gray-400 mt-1">Invoice ini dihasilkan secara otomatis dan sah tanpa tanda tangan.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 no-print">
+      <button onclick="printInvoice()" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3.5 rounded-2xl transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        Cetak Invoice
+      </button>
+      <button onclick="downloadInvoice()" class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-2xl transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Unduh Invoice
+      </button>
+      <a href="search-kost.html" class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-green-400 text-gray-700 hover:text-green-700 font-bold py-3.5 rounded-2xl transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Kembali ke Beranda
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-white border-t border-gray-200 mt-8 py-6 px-6 text-center text-xs text-gray-400 no-print">
+  © 2024 HUNIKA · Kelompok 6 WCD03 · Adinda · Stepanus · Kanaya
+</footer>
+
+<script>
+// ── Baca bookingData dari localStorage ──────────────────────────
+const kostId = getKostId();   // fallback dari URL ?id= atau localStorage
+const k      = DATA[kostId - 1];
+
+let bd = {};
+try {
+  bd = JSON.parse(localStorage.getItem('bookingData')) || {};
+} catch(e) { bd = {}; }
+
+// Fallback: jika localStorage kosong, gunakan data dari DATA array + URL ?room=
+if (!bd.kostId) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlRoom   = urlParams.get('room') || k.roomTypes[0].name;
+  const room      = k.roomTypes.find(r => r.name.toLowerCase() === urlRoom.toLowerCase()) || k.roomTypes[0];
+  bd = {
+    kostId:      kostId,
+    kostName:    k.name,
+    kostPhoto:   k.photo,
+    kostArea:    k.area,
+    kostAddress: k.address,
+    kostType:    k.type,
+    kostRating:  k.rating,
+    kostStars:   k.stars,
+    kostReviews: k.reviews,
+    roomType:    room.name,
+    roomPrice:   room.price,
+    nama:        '–',
+    telepon:     '–',
+    email:       '–',
+    tanggalMasuk: new Date().toISOString().slice(0,10),
+    durasi:      1,
+    durasiLabel: '1 Bulan',
+    subtotal:    room.price,
+    diskon:      0,
+    admin:       50000,
+    deposit:     400000,
+    total:       room.price + 50000 + 400000
+  };
+}
+
+// ── Perbaiki link navigasi ───────────────────────────────────────
+document.getElementById('back-to-booking').href = `booking.html?id=${kostId}&room=${encodeURIComponent(bd.roomType || '')}`;
+document.getElementById('bc-detail').href       = `detail-kost.html?id=${kostId}`;
+document.getElementById('bc-booking').href      = `booking.html?id=${kostId}&room=${encodeURIComponent(bd.roomType || '')}`;
+
+// ── Generate ID unik ────────────────────────────────────────────
+const today     = new Date();
+const dateStr   = today.toISOString().slice(0,10).replace(/-/g,'');
+const rnd       = Math.floor(Math.random() * 900 + 100);
+const bookingId = 'BK-' + dateStr + '-' + rnd;
+const invoiceId = 'INV-' + dateStr + '-' + rnd;
+
+// ── Isi halaman ──────────────────────────────────────────────────
+function fillPage() {
+  const totalFmt    = fmt(bd.total);
+  const subtotalFmt = fmt(bd.subtotal);
+
+  // Kost info
+  document.getElementById('tx-photo').src   = bd.kostPhoto;
+  document.getElementById('tx-photo').alt   = bd.kostName;
+  document.getElementById('tx-name').textContent = bd.kostName;
+  document.getElementById('tx-area').textContent = bd.kostArea;
+  document.getElementById('tx-room').textContent = bd.roomType;
+
+  // Booking info
+  document.getElementById('booking-id').textContent        = bookingId;
+  document.getElementById('sidebar-booking-id').textContent = bookingId;
+
+  const checkin = new Date(bd.tanggalMasuk || today);
+  const checkinFmt = checkin.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+  const checkout   = new Date(bd.tanggalMasuk || today);
+  checkout.setMonth(checkout.getMonth() + (parseInt(bd.durasi) || 1));
+  const checkoutFmt = checkout.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+
+  document.getElementById('tx-checkin').textContent  = checkinFmt;
+  document.getElementById('tx-duration').textContent = bd.durasiLabel || '1 Bulan';
+  document.getElementById('tx-penyewa').textContent  = bd.nama || '–';
+
+  // Sidebar
+  document.getElementById('sidebar-photo').src  = bd.kostPhoto;
+  document.getElementById('sidebar-photo').alt  = bd.kostName;
+  document.getElementById('sidebar-name').textContent     = bd.kostName;
+  document.getElementById('sidebar-area').textContent     = bd.kostArea;
+  document.getElementById('sidebar-room').textContent     = bd.roomType;
+  document.getElementById('sidebar-duration').textContent = bd.durasiLabel || '1 Bulan';
+  document.getElementById('sidebar-rent').textContent     = subtotalFmt;
+  document.getElementById('sidebar-total').textContent    = totalFmt;
+
+  if (bd.diskon > 0) {
+    document.getElementById('sidebar-discount-row').classList.remove('hidden');
+    document.getElementById('sidebar-discount').textContent = '- ' + fmt(bd.diskon);
+  }
+
+  // Totals pada metode pembayaran
+  document.getElementById('qris-total').textContent = totalFmt;
+  document.getElementById('bank-total').textContent = totalFmt;
+
+  // Invoice fields
+  document.getElementById('invoice-number').textContent = invoiceId;
+  document.getElementById('inv-booking-id').textContent = bookingId;
+  document.getElementById('inv-date').textContent       = today.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('inv-nama').textContent       = bd.nama   || '–';
+  document.getElementById('inv-email').textContent      = bd.email  || '–';
+  document.getElementById('inv-phone').textContent      = bd.telepon || '–';
+  document.getElementById('inv-photo').src              = bd.kostPhoto;
+  document.getElementById('inv-kost-name').textContent  = bd.kostName;
+  document.getElementById('inv-kost-area').textContent  = bd.kostArea;
+  document.getElementById('inv-room').textContent       = bd.roomType;
+  document.getElementById('inv-duration').textContent   = bd.durasiLabel || '1 Bulan';
+  document.getElementById('inv-checkin').textContent    = checkinFmt;
+  document.getElementById('inv-checkout').textContent   = checkoutFmt;
+  document.getElementById('inv-rent').textContent       = subtotalFmt;
+  document.getElementById('inv-total').textContent      = totalFmt;
+  document.getElementById('inv-time').textContent       = today.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' }) + ' WIB';
+
+  if (bd.diskon > 0) {
+    document.getElementById('inv-discount-row').classList.remove('hidden');
+    document.getElementById('inv-discount').textContent = '- ' + fmt(bd.diskon);
+  }
+}
+
+fillPage();
+
+// ── Countdown 24 jam ─────────────────────────────────────────────
+let countdownEnd = localStorage.getItem('countdown_end');
+if (!countdownEnd) {
+  countdownEnd = Date.now() + 24 * 60 * 60 * 1000;
+  localStorage.setItem('countdown_end', countdownEnd);
+}
+
+function updateCountdown() {
+  const remaining = parseInt(countdownEnd) - Date.now();
+  if (remaining <= 0) { document.getElementById('countdown-display').textContent = '00:00:00'; return; }
+  const h = Math.floor(remaining / 3600000);
+  const m = Math.floor((remaining % 3600000) / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  document.getElementById('countdown-display').textContent =
+    String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// ── Payment tabs ──────────────────────────────────────────────────
+let currentMethod = 'QRIS';
+function switchPayCat(cat) {
+  ['qris','bank','ewallet'].forEach(c => {
+    document.getElementById('tab-' + c).classList.toggle('active', c === cat);
+    document.getElementById('panel-' + c).classList.toggle('active', c === cat);
+  });
+  const map = { qris:'QRIS', bank:'Transfer Bank', ewallet:'E-Wallet' };
+  currentMethod = map[cat];
+}
+
+// ── Bank ──────────────────────────────────────────────────────────
+function selectBank(btn, bankName, vaNumber) {
+  document.querySelectorAll('.bank-btn').forEach(b => {
+    b.classList.remove('active','border-green-500','bg-green-50');
+    b.classList.add('border-gray-200');
+  });
+  btn.classList.add('active','border-green-500','bg-green-50');
+  btn.classList.remove('border-gray-200');
+  document.getElementById('selected-bank-name').textContent = bankName;
+  document.getElementById('bank-name-display').textContent  = 'Bank ' + bankName;
+  document.getElementById('va-number').textContent          = vaNumber;
+  currentMethod = 'Transfer ' + bankName;
+}
+
+function copyVA() {
+  const va = document.getElementById('va-number').textContent;
+  const btn = document.getElementById('copy-va-btn');
+  navigator.clipboard.writeText(va).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = va; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  }).finally(() => {
+    btn.textContent = 'Disalin!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Salin'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── E-wallet ──────────────────────────────────────────────────────
+function selectEwallet(card, name, number) {
+  document.querySelectorAll('#panel-ewallet > .grid > div').forEach(c => {
+    c.classList.remove('border-green-400','bg-green-50'); c.classList.add('border-gray-200');
+  });
+  card.classList.add('border-green-400','bg-green-50'); card.classList.remove('border-gray-200');
+  const info = document.getElementById('ewallet-info');
+  info.classList.remove('hidden');
+  document.getElementById('ewallet-name').textContent   = name;
+  document.getElementById('ewallet-number').textContent = number;
+  document.getElementById('ewallet-total').textContent  = fmt(bd.total);
+  currentMethod = name;
+}
+
+// ── File upload ───────────────────────────────────────────────────
+let uploadedFile = null;
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('Ukuran file melebihi 5MB. Silakan pilih file yang lebih kecil.'); return; }
+  uploadedFile = file;
+  document.getElementById('upload-zone').classList.add('has-file');
+  document.getElementById('upload-placeholder').classList.add('hidden');
+  document.getElementById('upload-preview').classList.remove('hidden');
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+}
+
+function removeFile(e) {
+  e.stopPropagation(); uploadedFile = null;
+  document.getElementById('upload-zone').classList.remove('has-file');
+  document.getElementById('upload-placeholder').classList.remove('hidden');
+  document.getElementById('upload-preview').classList.add('hidden');
+  document.getElementById('file-input').value = '';
+}
+
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('border-green-500'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('border-green-500'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('border-green-500');
+  const file = e.dataTransfer.files[0];
+  if (file) { document.getElementById('file-input').files = e.dataTransfer.files; handleFileUpload({ target: { files: [file] } }); }
+});
+
+// ── Confirm payment ───────────────────────────────────────────────
+function confirmPayment() {
+  const btn = document.getElementById('confirm-btn');
+  btn.textContent = 'Memproses...'; btn.disabled = true; btn.classList.add('opacity-75');
+  setTimeout(showSuccessScreen, 1800);
+}
+
+function showSuccessScreen() {
+  document.getElementById('inv-method').textContent = currentMethod;
+  document.getElementById('inv-time').textContent   = new Date().toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' }) + ' WIB';
+  const screen = document.getElementById('success-screen');
+  screen.classList.add('show');
+  screen.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => { screen.scrollIntoView({ behavior: 'smooth' }); document.body.style.overflow = ''; }, 50);
+  localStorage.removeItem('countdown_end');
+  localStorage.removeItem('bookingData');
+}
+
+function printInvoice() { window.print(); }
+
+function downloadInvoice() {
+  const el = document.getElementById('invoice-content');
+  const pw = window.open('', '_blank');
+  pw.document.write('<html><head><title>Invoice ' + invoiceId + '</title>');
+  pw.document.write('<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>');
+  pw.document.write('<style>body{font-family:"Plus Jakarta Sans",sans-serif;margin:0;padding:20px;background:white;}*{box-sizing:border-box;}</style>');
+  pw.document.write('</head><body>');
+  pw.document.write(el.outerHTML);
+  pw.document.write('</body></html>');
+  pw.document.close(); pw.focus();
+  setTimeout(() => { pw.print(); pw.close(); }, 500);
+}
+</script>
+
+</body>
+</html>

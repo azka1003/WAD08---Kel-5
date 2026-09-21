@@ -1,0 +1,28 @@
+ body{
+        border: 1px solid #4B5694;
+    }
+
+
+.nama{
+    color: hotpink;
+    margin: 0px;
+}
+
+header{
+    background-color: bisque;
+    display: flex;
+    align-items: center;
+}
+
+main{
+    background-color: azure;
+}
+
+.section1{
+    background-color: aliceblue;
+}
+
+.section2{
+    background-color: beige;
+}
+

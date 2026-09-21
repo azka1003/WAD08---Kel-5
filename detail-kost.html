@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detail Kost | Hunika</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .tab-btn.active { border-bottom: 3px solid #10b981; color: #059669; font-weight: 700; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .star { color: #f59e0b; }
+    input:focus, select:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.12); }
+  </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+
+<!-- NAVBAR -->
+<nav class="bg-white border-b border-gray-200 px-6 md:px-10 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+  <a href="search-kost.html" class="text-2xl font-extrabold text-green-600 tracking-tight">HUNIKA</a>
+  <ul class="hidden md:flex gap-8 text-sm font-medium text-gray-600">
+    <li><a href="search-kost.html" class="hover:text-green-600 transition">Cari Kost</a></li>
+    <li><a href="#" class="hover:text-green-600 transition">Dashboard Pemilik</a></li>
+    <li><a href="#" class="hover:text-green-600 transition">Favorit</a></li>
+  </ul>
+  <a id="nav-booking-btn" href="booking.html" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">Booking Sekarang</a>
+</nav>
+
+<div id="kost-detail" class="max-w-7xl mx-auto px-6 pb-16">
+
+  <!-- breadcrumb -->
+  <div class="pt-5 pb-2">
+    <nav class="flex items-center gap-2 text-sm text-gray-400">
+      <a href="search-kost.html" class="hover:text-green-600 transition">Beranda</a><span>/</span>
+      <span class="hover:text-green-600 transition">Detail Kost</span><span>/</span>
+      <span class="text-gray-700 font-medium" id="d-breadcrumb"></span>
+    </nav>
+  </div>
+
+  <a href="search-kost.html" class="flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 transition font-medium mb-5">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali ke Daftar Kost
+  </a>
+
+  <!-- header -->
+  <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">Tersedia</span>
+        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-600" id="d-type"></span>
+        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-purple-50 text-purple-600" id="d-tier"></span>
+      </div>
+      <h1 class="text-3xl font-extrabold text-gray-900 mb-1" id="d-name"></h1>
+      <p class="text-gray-500 text-sm flex items-center gap-1">
+        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span id="d-address"></span>
+      </p>
+      <div class="flex items-center gap-2 mt-2">
+        <span class="star" id="d-stars"></span>
+        <span class="font-bold text-gray-800 text-sm" id="d-rating"></span>
+        <span class="text-gray-400 text-sm" id="d-rcount"></span>
+      </div>
+    </div>
+    <button class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 hover:text-red-500 transition bg-white self-start">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      Simpan
+    </button>
+  </div>
+
+  <!-- main 2-col -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- FOTO UTAMA -->
+      <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+        <img id="d-photo" src="" alt="" class="w-full h-96 object-cover"/>
+        <div class="p-4 flex items-center justify-between">
+          <p class="text-sm text-gray-500 font-medium" id="d-photo-cap"></p>
+          <span class="text-xs bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full" id="d-photo-num"></span>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="flex border-b border-gray-100 overflow-x-auto">
+          <button onclick="switchTab('deskripsi')" id="tab-btn-deskripsi" class="tab-btn active px-5 py-4 text-sm text-gray-500 whitespace-nowrap hover:text-green-600 transition">Deskripsi</button>
+          <button onclick="switchTab('fasilitas')" id="tab-btn-fasilitas" class="tab-btn px-5 py-4 text-sm text-gray-500 whitespace-nowrap hover:text-green-600 transition">Fasilitas</button>
+          <button onclick="switchTab('peraturan')" id="tab-btn-peraturan" class="tab-btn px-5 py-4 text-sm text-gray-500 whitespace-nowrap hover:text-green-600 transition">Peraturan</button>
+          <button onclick="switchTab('kamar')"     id="tab-btn-kamar"     class="tab-btn px-5 py-4 text-sm text-gray-500 whitespace-nowrap hover:text-green-600 transition">Info Kamar</button>
+          <button onclick="switchTab('ulasan')"    id="tab-btn-ulasan"    class="tab-btn px-5 py-4 text-sm text-gray-500 whitespace-nowrap hover:text-green-600 transition">Ulasan</button>
+        </div>
+
+        <!-- Deskripsi -->
+        <div id="tab-deskripsi" class="tab-content active p-6">
+          <h2 class="text-lg font-bold text-gray-800 mb-3">Tentang <span id="d-desc-name"></span></h2>
+          <p class="text-gray-600 text-sm leading-relaxed mb-3" id="d-desc1"></p>
+          <p class="text-gray-600 text-sm leading-relaxed" id="d-desc2"></p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
+            <div class="bg-green-50 rounded-xl p-4 text-center"><div class="text-2xl font-extrabold text-green-600" id="d-s1"></div><div class="text-xs text-gray-500 mt-1">Total Kamar</div></div>
+            <div class="bg-green-50 rounded-xl p-4 text-center"><div class="text-2xl font-extrabold text-green-600" id="d-s2"></div><div class="text-xs text-gray-500 mt-1">Rating</div></div>
+            <div class="bg-green-50 rounded-xl p-4 text-center"><div class="text-2xl font-extrabold text-green-600" id="d-s3"></div><div class="text-xs text-gray-500 mt-1">Ulasan</div></div>
+            <div class="bg-green-50 rounded-xl p-4 text-center"><div class="text-2xl font-extrabold text-green-600" id="d-s4"></div><div class="text-xs text-gray-500 mt-1">Tahun Berdiri</div></div>
+          </div>
+        </div>
+
+        <!-- Fasilitas -->
+        <div id="tab-fasilitas" class="tab-content p-6">
+          <h2 class="text-lg font-bold text-gray-800 mb-5">Fasilitas Tersedia</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-sm font-bold text-green-700 uppercase tracking-wide mb-3">Fasilitas Kamar</h3>
+              <ul class="space-y-3" id="d-fas-kamar"></ul>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-green-700 uppercase tracking-wide mb-3">Fasilitas Umum</h3>
+              <ul class="space-y-3" id="d-fas-umum"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Peraturan -->
+        <div id="tab-peraturan" class="tab-content p-6">
+          <h2 class="text-lg font-bold text-gray-800 mb-5">Peraturan Kost</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-sm font-bold text-green-700 uppercase tracking-wide mb-3">Diperbolehkan</h3>
+              <ul class="space-y-3">
+                <li class="flex items-start gap-3 text-sm text-gray-600"><span class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center text-green-600 flex-shrink-0 mt-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Membawa kendaraan pribadi</li>
+                <li class="flex items-start gap-3 text-sm text-gray-600"><span class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center text-green-600 flex-shrink-0 mt-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Tamu di lobby hingga pukul 21.00</li>
+                <li class="flex items-start gap-3 text-sm text-gray-600"><span class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center text-green-600 flex-shrink-0 mt-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></span>Memasak di dapur bersama</li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-red-600 uppercase tracking-wide mb-3">Tidak Diperbolehkan</h3>
+              <ul class="space-y-3">
+                <li class="flex items-start gap-3 text-sm text-gray-600"><span class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center text-red-500 flex-shrink-0 mt-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg></span>Membawa hewan peliharaan</li>
+                <li class="flex items-start gap-3 text-sm text-gray-600"><span class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center text-red-500 flex-shrink-0 mt-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg></span>Merokok di dalam kamar</li>
+                <li class="flex items-start gap-3 text-sm text-gray-600"><span class="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center text-red-500 flex-shrink-0 mt-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg></span>Keributan setelah pukul 22.00</li>
+              </ul>
+            </div>
+          </div>
+          <div class="mt-5 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+            <p class="text-sm text-yellow-700 font-medium">Jam Malam: Pintu gerbang ditutup pukul 23.00. Penghuni wajib konfirmasi ke petugas keamanan jika pulang setelah jam tersebut.</p>
+          </div>
+        </div>
+
+        <!-- Info Kamar -->
+        <div id="tab-kamar" class="tab-content p-6">
+          <h2 class="text-lg font-bold text-gray-800 mb-5">Pilihan Tipe Kamar</h2>
+          <div class="space-y-4" id="d-room-list"></div>
+        </div>
+
+        <!-- Ulasan -->
+        <div id="tab-ulasan" class="tab-content p-6">
+          <h2 class="text-lg font-bold text-gray-800 mb-4">Ulasan Penghuni</h2>
+          <div class="flex items-center gap-6 mb-6">
+            <div class="text-center">
+              <div class="text-5xl font-extrabold text-green-600" id="d-big-rating"></div>
+              <div class="flex justify-center mt-1"><span class="star text-lg">★★★★★</span></div>
+              <div class="text-xs text-gray-400 mt-1" id="d-big-rcount"></div>
+            </div>
+            <div class="flex-1 space-y-2">
+              <div class="flex items-center gap-2"><span class="text-xs text-gray-500 w-5">5</span><div class="flex-1 bg-gray-100 rounded-full h-2"><div class="bg-green-500 h-2 rounded-full" style="width:78%"></div></div><span class="text-xs text-gray-400 w-8">78%</span></div>
+              <div class="flex items-center gap-2"><span class="text-xs text-gray-500 w-5">4</span><div class="flex-1 bg-gray-100 rounded-full h-2"><div class="bg-green-400 h-2 rounded-full" style="width:14%"></div></div><span class="text-xs text-gray-400 w-8">14%</span></div>
+              <div class="flex items-center gap-2"><span class="text-xs text-gray-500 w-5">3</span><div class="flex-1 bg-gray-100 rounded-full h-2"><div class="bg-yellow-400 h-2 rounded-full" style="width:5%"></div></div><span class="text-xs text-gray-400 w-8">5%</span></div>
+              <div class="flex items-center gap-2"><span class="text-xs text-gray-500 w-5">2</span><div class="flex-1 bg-gray-100 rounded-full h-2"><div class="bg-orange-400 h-2 rounded-full" style="width:2%"></div></div><span class="text-xs text-gray-400 w-8">2%</span></div>
+              <div class="flex items-center gap-2"><span class="text-xs text-gray-500 w-5">1</span><div class="flex-1 bg-gray-100 rounded-full h-2"><div class="bg-red-400 h-2 rounded-full" style="width:1%"></div></div><span class="text-xs text-gray-400 w-8">1%</span></div>
+            </div>
+          </div>
+          <div class="space-y-5" id="d-review-list"></div>
+        </div>
+      </div>
+
+      <!-- Lokasi -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100">
+          <h2 class="text-lg font-bold text-gray-800">Lokasi</h2>
+          <p class="text-sm text-gray-500 mt-1" id="d-loc-text"></p>
+        </div>
+        <div class="bg-gradient-to-br from-green-50 to-blue-50 h-44 flex flex-col items-center justify-center gap-3">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <p class="text-sm text-gray-600 font-medium" id="d-map-area"></p>
+          <a href="https://maps.google.com" target="_blank" class="flex items-center gap-2 bg-white border border-gray-200 hover:border-green-300 text-green-700 text-sm font-semibold px-4 py-2 rounded-xl transition shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            Buka di Google Maps
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+      <div class="sticky top-24 space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-baseline justify-between mb-1">
+            <span class="text-2xl font-extrabold text-green-600" id="d-price"></span>
+            <span class="text-sm text-gray-400">/ bulan</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-5">Harga mulai tipe Standar</p>
+          <div class="space-y-3 mb-5">
+            <div><label class="block text-xs font-bold text-gray-600 mb-1">Tanggal Masuk</label><input type="date" id="sb-checkin" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" onchange="updateSidebarTotal()"/></div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">Durasi Sewa</label>
+              <select id="sb-duration" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white transition" onchange="updateSidebarTotal()">
+                <option value="1">1 Bulan</option>
+                <option value="3">3 Bulan</option>
+                <option value="6">6 Bulan</option>
+                <option value="12">12 Bulan</option>
+              </select>
+            </div>
+          </div>
+          <div class="border-t border-gray-100 pt-4 mb-5 space-y-2">
+            <div class="flex justify-between text-sm"><span class="text-gray-500" id="sb-rent-label">Sewa 1 bulan</span><span class="font-semibold" id="d-sb-rent"></span></div>
+            <div class="flex justify-between text-sm"><span class="text-gray-500">Biaya Admin</span><span class="font-semibold">Rp 50.000</span></div>
+            <div class="flex justify-between text-sm"><span class="text-gray-500">Deposit</span><span class="font-semibold">Rp 400.000</span></div>
+            <div class="flex justify-between text-sm font-extrabold text-green-600 border-t border-gray-100 pt-2 mt-2"><span>Total</span><span id="d-sb-total"></span></div>
+          </div>
+          <!-- Tombol Booking Sekarang → booking.html?id=X (diisi JS) -->
+          <a id="sidebar-booking-btn" href="booking.html"
+             class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold text-center py-4 rounded-xl transition text-sm">
+            Booking Sekarang
+          </a>
+          <p class="text-xs text-gray-400 text-center mt-3">Belum dikenakan biaya sekarang</p>
+        </div>
+        <div class="bg-green-50 rounded-2xl p-4 border border-green-100">
+          <h3 class="text-sm font-bold text-green-800 mb-2">Keamanan Booking</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2 text-xs text-green-700"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pembayaran dilindungi sistem escrow Hunika</li>
+            <li class="flex items-start gap-2 text-xs text-green-700"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Garansi uang kembali 24 jam</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-white border-t border-gray-200 mt-16 py-8 px-6 text-center text-xs text-gray-400">
+  © 2024 HUNIKA · Kelompok 6 WCD03 · Adinda · Stepanus · Kanaya
+</footer>
+
+<!-- Data terpusat -->
+<script src="data-kost.js"></script>
+
+<script>
+// ── Baca ID dari URL / localStorage ─────────────────────────────
+const kostId    = getKostId();         // 1–12
+const kostIndex = kostId - 1;          // 0–11
+const k         = DATA[kostIndex];
+
+// Simpan ke localStorage sebagai backup
+saveKostId(kostId);
+
+// ── Set URL booking di semua tombol navbar & sidebar ─────────────
+function setBookingLinks(roomName) {
+  const base = `booking.html?id=${kostId}`;
+  const url  = roomName ? `${base}&room=${encodeURIComponent(roomName)}` : base;
+  document.getElementById('nav-booking-btn').href     = url;
+  document.getElementById('sidebar-booking-btn').href = url;
+}
+
+setBookingLinks('');  // default tanpa room dulu
+
+// ── Render halaman ───────────────────────────────────────────────
+function showDetail() {
+  document.title = `${k.name} | Hunika`;
+
+  // Header
+  document.getElementById('d-breadcrumb').textContent = k.name;
+  document.getElementById('d-name').textContent        = k.name;
+  document.getElementById('d-type').textContent        = k.type;
+  document.getElementById('d-tier').textContent        = k.tier;
+  document.getElementById('d-address').textContent     = k.address;
+  document.getElementById('d-stars').textContent       = k.stars;
+  document.getElementById('d-rating').textContent      = k.rating;
+  document.getElementById('d-rcount').textContent      = '(' + k.reviews + ' ulasan)';
+
+  // Photo
+  document.getElementById('d-photo').src             = k.photo;
+  document.getElementById('d-photo').alt             = k.name;
+  document.getElementById('d-photo-cap').textContent = 'Foto utama ' + k.name;
+  document.getElementById('d-photo-num').textContent = 'Kost ' + kostId + ' dari 12';
+
+  // Lokasi
+  document.getElementById('d-loc-text').textContent = k.address;
+  document.getElementById('d-map-area').textContent  = k.area;
+
+  // Harga sidebar
+  document.getElementById('d-price').textContent = fmt(k.price);
+  updateSidebarTotal();
+
+  // Deskripsi
+  document.getElementById('d-desc-name').textContent = k.name;
+  document.getElementById('d-desc1').textContent     = k.desc1;
+  document.getElementById('d-desc2').textContent     = k.desc2;
+  document.getElementById('d-s1').textContent = k.rooms;
+  document.getElementById('d-s2').textContent = k.rating;
+  document.getElementById('d-s3').textContent = k.reviews;
+  document.getElementById('d-s4').textContent = k.years;
+
+  // Fasilitas
+  const fasIcon = `<span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></span>`;
+  document.getElementById('d-fas-kamar').innerHTML = k.fasKamar.map(f => `<li class="flex items-center gap-3 text-sm text-gray-600">${fasIcon}${f}</li>`).join('');
+  document.getElementById('d-fas-umum').innerHTML  = k.fasUmum.map(f  => `<li class="flex items-center gap-3 text-sm text-gray-600">${fasIcon.replace('green','blue')}${f}</li>`).join('');
+
+  // Kamar — tombol "Pilih Kamar" membawa ?id=X&room=TYPE
+  document.getElementById('d-room-list').innerHTML = k.roomTypes.map(r => `
+    <div class="border border-gray-200 rounded-xl p-5 hover:border-green-300 transition">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <h3 class="font-bold text-gray-800">Kamar ${r.name}</h3>
+            <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">${r.status}</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-2">${r.size} · Kasur ${r.bed}</p>
+          <div class="flex flex-wrap gap-2">${r.extras.map(e=>`<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-lg">${e}</span>`).join('')}</div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <div class="text-xl font-extrabold text-green-600">${fmt(r.price)}</div>
+          <div class="text-xs text-gray-400">per bulan</div>
+          <a href="booking.html?id=${kostId}&room=${encodeURIComponent(r.name)}"
+             onclick="saveKostId(${kostId})"
+             class="mt-2 block bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition text-center">
+            Pilih Kamar
+          </a>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Ulasan
+  document.getElementById('d-big-rating').textContent = k.rating;
+  document.getElementById('d-big-rcount').textContent = k.reviews + ' ulasan';
+  document.getElementById('d-review-list').innerHTML = k.reviewList.map(r => `
+    <div class="border-b border-gray-100 pb-5">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-10 h-10 rounded-full ${r.color} flex items-center justify-center font-bold text-sm flex-shrink-0">${r.init}</div>
+        <div><div class="font-semibold text-sm text-gray-800">${r.name}</div><div class="text-xs text-gray-400">Penghuni sejak ${r.date}</div></div>
+        <div class="ml-auto text-sm star">${r.stars}</div>
+      </div>
+      <p class="text-sm text-gray-600 leading-relaxed">${r.text}</p>
+    </div>`).join('');
+
+  switchTab('deskripsi');
+}
+
+// ── Hitung total sidebar secara dinamis ──────────────────────────
+function updateSidebarTotal() {
+  const dur = parseInt(document.getElementById('sb-duration').value) || 1;
+  const total = k.price * dur + 50000 + 400000;
+  document.getElementById('sb-rent-label').textContent = `Sewa ${dur} bulan`;
+  document.getElementById('d-sb-rent').textContent  = fmt(k.price * dur);
+  document.getElementById('d-sb-total').textContent = fmt(total);
+}
+
+// ── Tab switcher ─────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.getElementById('tab-btn-'+id).classList.add('active');
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+showDetail();
+</script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunika - Dashboard Pemilik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <nav class="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100">
+        
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">H</div>
+            <span class="text-emerald-600 font-bold text-xl tracking-wide">Hunika</span>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <a href="#" class="text-sm text-gray-500 hover:text-emerald-600">Dashboard</a>
+            <a href="#" class="text-sm text-emerald-500 hover:text-emerald-700">Dashboard Pemilik</a>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button class="px-4 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">Masuk</button>
+            <button class="px-4 py-1.5 text-sm bg-emerald-500 rounded-lg text-white hover:bg-emerald-600">Daftar</button>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 py-10">
+        
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Owner Dashboard</h1>
+                <p class="text-sm text-gray-500 mt-1">Kelola Kos</p>
+            </div>
+            <button onclick="location.href='tambah_kos.html'"
+            class="px-4 py-2 bg-emerald-500 text-white text-sm font-medium rounded-xl flex items-center gap-2 hover:bg-emerald-600 shadow-sm cursor-pointer">
+                <span>+</span> Tambah Kos
+            
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+            <div class="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100">
+                <span class="text-3xl font-bold text-emerald-700 block">3</span>
+                <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mt-1 block">Total Kos</span>
+            </div>
+            <div class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
+                <span class="text-3xl font-bold text-blue-700 block">2</span>
+                <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider mt-1 block">Tersedia</span>
+            </div>
+            <div class="bg-pink-50/50 p-5 rounded-2xl border border-pink-100">
+                <span class="text-3xl font-bold text-pink-700 block">0</span>
+                <span class="text-xs font-semibold text-pink-600 uppercase tracking-wider mt-1 block">Penuh</span>
+            </div>
+            <div class="bg-amber-50/50 p-5 rounded-2xl border border-amber-100">
+                <span class="text-3xl font-bold text-amber-700 block">10</span>
+                <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider mt-1 block">Total Review</span>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+            
+            <div class="grid grid-cols-12 px-6 py-4 bg-gray-50/70 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <div class="col-span-6">Kos</div>
+                <div class="col-span-2">Harga</div>
+                <div class="col-span-2">Status</div>
+                <div class="col-span-2 text-center">Aksi</div>
+            </div>
+
+            <div class="grid grid-cols-12 px-6 py-5 border-b border-gray-100 items-center hover:bg-gray-50/50 transition">
+                <div class="col-span-6">
+                    <h3 class="font-semibold text-gray-900 text-sm">Kos Melati</h3>
+                    <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">Kemang, Jakarta Selatan</p>
+                </div>
+
+                <div class="col-span-2 font-semibold text-emerald-600 text-sm">
+                    Rp. 1,200,000
+                </div>
+
+                <div class="col-span-2">
+                    <span class="px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full">
+                        Tersedia
+                    </span>
+                </div>
+
+                <div class="col-span-2 flex justify-center gap-2">
+                    <button onclick="openEditModal('Kos Melati', 1200000, 'Kemang, Jakarta Selatan')"
+                    class="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100">Edit</button>
+                    <button class="px-3 py-1 text-xs font-medium bg-pink-50 text-pink-600 rounded-md hover:bg-pink-100">Hapus</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 px-6 py-5 border-b border-gray-100 items-center hover:bg-gray-50/50 transition">
+                <div class="col-span-6">
+                    <h3 class="font-semibold text-gray-900 text-sm">Kos Huni</h3>
+                    <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">Pondok Indah, Jakarta Selatan</p>
+                </div>
+
+                <div class="col-span-2 font-semibold text-emerald-600 text-sm">
+                    Rp. 2,500,000
+                </div>
+
+                <div class="col-span-2">
+                    <span class="px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full">
+                        Tersedia
+                    </span>
+                </div>
+
+                <div class="col-span-2 flex justify-center gap-2">
+                    <button onclick="openEditModal('Kos Huni', 2500000, 'Pondok Indah, Jakarta Selatan')"
+                    class="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100">Edit</button>
+                    <button class="px-3 py-1 text-xs font-medium bg-pink-50 text-pink-600 rounded-md hover:bg-pink-100">Hapus</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 px-6 py-5 border-b border-gray-100 items-center hover:bg-gray-50/50 transition">
+                <div class="col-span-6">
+                    <h3 class="font-semibold text-gray-900 text-sm">Kos Nestia</h3>
+                    <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">Kemang, Jakarta Selatan</p>
+                </div>
+
+                <div class="col-span-2 font-semibold text-emerald-600 text-sm">
+                    Rp. 1,000,000
+                </div>
+
+                <div class="col-span-2">
+                    <span class="px-2.5 py-1 text-xs font-medium bg-amber-50 text-amber-900 border border-amber-100 rounded-full">
+                        Tersisa 1 Kamar
+                    </span>
+                </div>
+
+                <div class="col-span-2 flex justify-center gap-2">
+                    <button onclick="openEditModal('Kos Nestia', 1000000, 'Kemang, Jakarta Selatan')"
+                    class="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100">Edit</button>
+                    <button class="px-3 py-1 text-xs font-medium bg-pink-50 text-pink-600 rounded-md hover:bg-pink-100">Hapus</button>
+                </div>
+            </div>
+
+        </div>
+     </main>
+     <div id="modalEditContainer"></div>
+    <script>
+    //Ambil file modal
+    document.addEventListener("DOMContentLoaded", function() {
+        // memanggil file modal 
+        fetch('modal-edit-kos.html')
+            .then(response => response.text())
+            .then(data => {
+                // memasukkan isi modal ke wadah kosong di dashboard
+                document.getElementById('modalEditContainer').innerHTML = data;
+            })
+            .catch(error => console.error('Gagal memuat file modal:', error));
+    });
+
+    // Buka pop up + Isi data otomatis (manual)
+    function openEditModal(nama, harga, lokasi) {
+        const editModal = document.getElementById('editKosModal');
+        
+        
+        editModal.classList.remove('hidden');
+        editModal.classList.add('flex');
+
+        // isi kotak input form di modal 
+        document.getElementById('editNamaKos').value = nama;
+        document.getElementById('editHargaKos').value = harga;
+        document.getElementById('editLokasiKos').value = lokasi;
+    }
+
+    //Fungsi Tutup Pop Up
+    function closeModalEdit() {
+        const editModal = document.getElementById('editKosModal');
+        
+        // sembunyikan lagi modalnya
+        editModal.classList.remove('flex');
+        editModal.classList.add('hidden');
+    }
+
+    // Logika dan alert saat tekan button simpan
+    document.addEventListener('submit', function(e) {
+        if (e.target && e.target.id === 'formEditKos') {
+            e.preventDefault(); // tahan halaman biar gak reload/refresh
+            
+            const namaBaru = document.getElementById('editNamaKos').value;
+            alert('Data ' + namaBaru + ' berhasil diperbarui!');
+            
+            closeModalEdit(); // tutup pop-up otomatis
+        }
+    });
+</script>
+</body>
+</html>

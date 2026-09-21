@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking Kost | Hunika</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .step-active   { background: #10b981; color: white; border-color: #10b981; }
+    .step-done     { background: #d1fae5; color: #065f46; border-color: #10b981; }
+    .step-inactive { background: white; color: #9ca3af; border-color: #e5e7eb; }
+    .step-line-done   { background: #10b981; }
+    .step-line-undone { background: #e5e7eb; }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+    }
+    .room-card { transition: all .2s; cursor: pointer; }
+    .room-card:hover { border-color: #10b981; background: #f0fdf4; }
+    .room-card.selected { border-color: #10b981; background: #f0fdf4; }
+    .price-row { display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 8px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+
+<!-- Data terpusat (dimuat lebih awal agar tersedia saat script init berjalan) -->
+<script src="data-kost.js"></script>
+
+<!-- NAVBAR -->
+<nav class="bg-white border-b border-gray-200 px-6 md:px-10 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+  <a href="search-kost.html" class="text-2xl font-extrabold text-green-600 tracking-tight">HUNIKA</a>
+  <ul class="hidden md:flex gap-8 text-sm font-medium text-gray-600">
+    <li><a href="search-kost.html" class="hover:text-green-600 transition">Cari Kost</a></li>
+    <li><a href="#" class="hover:text-green-600 transition">Dashboard Pemilik</a></li>
+    <li><a href="#" class="hover:text-green-600 transition">Favorit</a></li>
+  </ul>
+  <a id="back-to-detail" href="detail-kost.html" class="flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 transition font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Kembali ke Detail
+  </a>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="max-w-6xl mx-auto px-6 pt-5 pb-2">
+  <nav class="flex items-center gap-2 text-sm text-gray-400">
+    <a href="search-kost.html" class="hover:text-green-600 transition">Beranda</a>
+    <span>/</span>
+    <a id="bc-detail" href="detail-kost.html" class="hover:text-green-600 transition">Detail Kost</a>
+    <span>/</span>
+    <span class="text-gray-700 font-medium">Booking</span>
+  </nav>
+</div>
+
+<!-- STEP INDICATOR -->
+<div class="max-w-6xl mx-auto px-6 py-6">
+  <div class="flex items-center justify-center gap-0 max-w-lg mx-auto">
+    <div class="flex flex-col items-center">
+      <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm step-active">1</div>
+      <span class="text-xs mt-1 font-semibold text-green-700">Data Diri</span>
+    </div>
+    <div class="flex-1 h-0.5 mb-4 mx-2 step-line-undone"></div>
+    <div class="flex flex-col items-center">
+      <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm step-inactive">2</div>
+      <span class="text-xs mt-1 font-medium text-gray-400">Konfirmasi</span>
+    </div>
+    <div class="flex-1 h-0.5 mb-4 mx-2 step-line-undone"></div>
+    <div class="flex flex-col items-center">
+      <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm step-inactive">3</div>
+      <span class="text-xs mt-1 font-medium text-gray-400">Pembayaran</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="max-w-6xl mx-auto px-6 pb-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+  <!-- FORM SECTION -->
+  <div class="lg:col-span-2 space-y-6">
+
+    <!-- RINGKASAN KOST (diisi JS) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="text-base font-bold text-gray-800 mb-4">Kost yang Dipilih</h2>
+      <div class="flex gap-4">
+        <img id="bk-photo" src="" alt="" class="w-28 h-24 object-cover rounded-xl flex-shrink-0" />
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2 flex-wrap">
+            <h3 id="bk-name" class="font-bold text-gray-900 text-lg"></h3>
+            <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full flex-shrink-0">Tersedia</span>
+          </div>
+          <p id="bk-area" class="text-sm text-gray-500 mt-1 flex items-center gap-1">
+            <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span id="bk-area-text"></span>
+          </p>
+          <div class="flex items-center gap-1 mt-1">
+            <span id="bk-stars" class="text-yellow-400 text-sm"></span>
+            <span id="bk-rating" class="text-sm font-semibold text-gray-700"></span>
+            <span id="bk-reviews" class="text-xs text-gray-400"></span>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">Tipe Kost: <span id="bk-type" class="font-semibold text-gray-700"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILIHAN KAMAR (diisi JS) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="text-base font-bold text-gray-800 mb-4">Pilih Tipe Kamar</h2>
+      <div class="space-y-3" id="room-cards"></div>
+      <input type="hidden" id="selected-room-name" value="" />
+      <input type="hidden" id="selected-room-price" value="" />
+    </div>
+
+    <!-- TANGGAL & DURASI -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="text-base font-bold text-gray-800 mb-4">Jadwal Sewa</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Masuk <span class="text-red-500">*</span></label>
+          <input type="date" id="checkin-date" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" onchange="updateSummary()" />
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Durasi Sewa <span class="text-red-500">*</span></label>
+          <select id="duration" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white transition" onchange="updateSummary()">
+            <option value="1">1 Bulan</option>
+            <option value="3">3 Bulan</option>
+            <option value="6">6 Bulan (hemat 5%)</option>
+            <option value="12">12 Bulan (hemat 10%)</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4 bg-green-50 border border-green-100 rounded-xl px-4 py-3 flex items-center justify-between">
+        <span class="text-sm text-gray-600 font-medium">Perkiraan Tanggal Keluar</span>
+        <span class="text-sm font-bold text-green-700" id="checkout-date-display">–</span>
+      </div>
+    </div>
+
+    <!-- DATA PENYEWA -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="text-base font-bold text-gray-800 mb-4">Data Penyewa</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Nama Lengkap <span class="text-red-500">*</span></label>
+          <input type="text" id="nama" placeholder="Masukkan nama lengkap sesuai KTP" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Email <span class="text-red-500">*</span></label>
+          <input type="email" id="email" placeholder="contoh@email.com" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Nomor HP / WhatsApp <span class="text-red-500">*</span></label>
+          <input type="tel" id="phone" placeholder="08xx-xxxx-xxxx" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Jenis Kelamin <span class="text-red-500">*</span></label>
+          <select id="gender" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white transition">
+            <option value="">Pilih jenis kelamin</option>
+            <option>Laki-laki</option>
+            <option>Perempuan</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Lahir <span class="text-red-500">*</span></label>
+          <input type="date" id="birthdate" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Pekerjaan <span class="text-red-500">*</span></label>
+          <select id="job" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white transition">
+            <option value="">Pilih pekerjaan</option>
+            <option>Mahasiswa</option>
+            <option>Karyawan Swasta</option>
+            <option>PNS / ASN</option>
+            <option>Wiraswasta</option>
+            <option>Profesional Freelance</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Instansi / Kampus / Perusahaan</label>
+          <input type="text" id="instansi" placeholder="Nama tempat bekerja atau kuliah" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Alamat Asal <span class="text-red-500">*</span></label>
+          <textarea id="alamat" rows="3" placeholder="Jl. Nama Jalan No. XX, Kecamatan, Kota, Provinsi" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Kontak Darurat (Nama)</label>
+          <input type="text" id="emergency-name" placeholder="Nama orang tua / wali" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5">Kontak Darurat (Nomor HP)</label>
+          <input type="tel" id="emergency-phone" placeholder="08xx-xxxx-xxxx" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition" />
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CATATAN TAMBAHAN -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="text-base font-bold text-gray-800 mb-4">Catatan Tambahan</h2>
+      <textarea id="catatan" rows="4" placeholder="Tuliskan kebutuhan khusus, pertanyaan, atau informasi tambahan..." class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm transition resize-none"></textarea>
+    </div>
+
+    <!-- SYARAT & KETENTUAN -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="text-base font-bold text-gray-800 mb-4">Syarat dan Ketentuan</h2>
+      <div class="bg-gray-50 rounded-xl p-4 mb-4 h-36 overflow-y-auto text-sm text-gray-600 leading-relaxed space-y-2">
+        <p><strong class="text-gray-800">1. Pembayaran:</strong> Penyewa wajib melakukan pembayaran penuh dalam waktu 24 jam setelah booking dikonfirmasi.</p>
+        <p><strong class="text-gray-800">2. Deposit:</strong> Deposit sebesar Rp 400.000 akan dikembalikan sepenuhnya saat penyewa meninggalkan kost dalam kondisi kamar baik.</p>
+        <p><strong class="text-gray-800">3. Pembatalan:</strong> Pembatalan lebih dari 7 hari mendapat pengembalian 100%. Kurang dari 7 hari dikenakan biaya 50%.</p>
+        <p><strong class="text-gray-800">4. Peraturan Kost:</strong> Penyewa wajib mematuhi seluruh peraturan yang berlaku di kost yang dipilih.</p>
+        <p><strong class="text-gray-800">5. Kerusakan:</strong> Penyewa bertanggung jawab atas kerusakan fasilitas kamar akibat kelalaian.</p>
+        <p><strong class="text-gray-800">6. Privasi:</strong> Data pribadi penyewa dijaga kerahasiaannya sesuai kebijakan privasi Hunika.</p>
+      </div>
+      <div class="space-y-3">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="agree-terms" class="mt-1 w-4 h-4 accent-green-600 flex-shrink-0" onchange="checkAgreements()" />
+          <span class="text-sm text-gray-700">Saya telah membaca dan menyetujui <span class="text-green-600 font-semibold">Syarat dan Ketentuan</span> serta <span class="text-green-600 font-semibold">Peraturan Kost</span> yang berlaku.</span>
+        </label>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="agree-privacy" class="mt-1 w-4 h-4 accent-green-600 flex-shrink-0" onchange="checkAgreements()" />
+          <span class="text-sm text-gray-700">Saya menyetujui penggunaan data pribadi saya sesuai <span class="text-green-600 font-semibold">Kebijakan Privasi</span> Hunika.</span>
+        </label>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="agree-rules" class="mt-1 w-4 h-4 accent-green-600 flex-shrink-0" onchange="checkAgreements()" />
+          <span class="text-sm text-gray-700">Saya menyatakan bahwa seluruh data yang saya isi adalah benar dan dapat dipertanggungjawabkan.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- TOMBOL LANJUT -->
+    <div>
+      <button id="submit-btn" onclick="submitBooking()" disabled
+        class="w-full bg-gray-300 text-gray-500 cursor-not-allowed font-bold py-4 rounded-2xl transition text-base shadow-sm">
+        Lanjut ke Pembayaran
+      </button>
+      <p class="text-xs text-gray-400 text-center mt-3">Dengan melanjutkan, Anda menyetujui syarat dan ketentuan yang berlaku</p>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: RINGKASAN BIAYA -->
+  <div class="lg:col-span-1">
+    <div class="sticky top-24 space-y-4">
+
+      <!-- Foto Kost Preview -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <img id="sidebar-photo" src="" alt="" class="w-full h-44 object-cover" />
+        <div class="p-4">
+          <h3 id="sidebar-name" class="font-bold text-gray-800"></h3>
+          <p id="sidebar-area" class="text-xs text-gray-400 mt-1"></p>
+          <div class="flex items-center gap-1 mt-1">
+            <span id="sidebar-stars" class="text-yellow-400 text-xs"></span>
+            <span id="sidebar-rating" class="text-xs font-semibold text-gray-700"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ringkasan Biaya -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-bold text-gray-800 mb-4">Ringkasan Biaya</h3>
+
+        <div class="space-y-2 text-sm text-gray-600">
+          <div class="flex justify-between">
+            <span>Tipe Kamar</span>
+            <span class="font-semibold text-gray-800" id="summary-room">–</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Durasi Sewa</span>
+            <span class="font-semibold text-gray-800" id="summary-duration">1 Bulan</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Tanggal Masuk</span>
+            <span class="font-semibold text-gray-800" id="summary-checkin">–</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Tanggal Keluar</span>
+            <span class="font-semibold text-gray-800" id="summary-checkout">–</span>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-100 mt-4 pt-4 space-y-2">
+          <div class="price-row">
+            <span class="text-gray-500" id="rent-label">Sewa 1 bulan</span>
+            <span class="font-semibold" id="rent-amount">–</span>
+          </div>
+          <div class="price-row">
+            <span class="text-gray-500">Biaya Admin</span>
+            <span class="font-semibold">Rp 50.000</span>
+          </div>
+          <div class="price-row">
+            <span class="text-gray-500">Deposit (refundable)</span>
+            <span class="font-semibold">Rp 400.000</span>
+          </div>
+          <div id="discount-row" class="price-row hidden">
+            <span class="text-green-600">Diskon</span>
+            <span class="font-semibold text-green-600" id="discount-amount">–</span>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 mt-3 pt-3 flex justify-between items-baseline">
+          <span class="text-sm font-bold text-gray-800">Total Pembayaran</span>
+          <span class="text-xl font-extrabold text-green-600" id="total-price">–</span>
+        </div>
+      </div>
+
+      <!-- Info Keamanan -->
+      <div class="bg-green-50 rounded-2xl p-4 border border-green-100">
+        <h4 class="text-sm font-bold text-green-800 mb-2">Keamanan Transaksi</h4>
+        <ul class="space-y-1.5">
+          <li class="flex items-center gap-2 text-xs text-green-700"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Enkripsi SSL 256-bit</li>
+          <li class="flex items-center gap-2 text-xs text-green-700"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Data dijaga kerahasiaannya</li>
+          <li class="flex items-center gap-2 text-xs text-green-700"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Garansi uang kembali 24 jam</li>
+        </ul>
+      </div>
+
+      <!-- Butuh Bantuan? -->
+      <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+        <h4 class="text-sm font-bold text-gray-800 mb-2">Butuh Bantuan?</h4>
+        <p class="text-xs text-gray-500 mb-3">Tim Hunika siap membantu kamu</p>
+        <a href="tel:+628123456789" class="flex items-center gap-2 text-green-600 text-sm font-semibold hover:underline">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+          +62 812-3456-7890
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-white border-t border-gray-200 mt-8 py-6 px-6 text-center text-xs text-gray-400">
+  © 2024 HUNIKA · Kelompok 6 WCD03 · Adinda · Stepanus · Kanaya
+</footer>
+
+<script>
+// ── Baca parameter dari URL ──────────────────────────────────────
+const kostId    = getKostId();           // 1–12
+const kostIndex = kostId - 1;            // 0–11
+const k         = DATA[kostIndex];
+
+const urlParams   = new URLSearchParams(window.location.search);
+const urlRoom     = urlParams.get('room') || '';   // nama room dari URL
+
+// Simpan ke localStorage
+saveKostId(kostId);
+
+// ── Perbaiki link "Kembali ke Detail" ────────────────────────────
+document.getElementById('back-to-detail').href = `detail-kost.html?id=${kostId}`;
+document.getElementById('bc-detail').href       = `detail-kost.html?id=${kostId}`;
+
+// ── Isi data kost di header & sidebar ───────────────────────────
+document.title = `Booking – ${k.name} | Hunika`;
+document.getElementById('bk-photo').src          = k.photo;
+document.getElementById('bk-photo').alt          = k.name;
+document.getElementById('bk-name').textContent   = k.name;
+document.getElementById('bk-area-text').textContent = k.area;
+document.getElementById('bk-stars').textContent  = k.stars;
+document.getElementById('bk-rating').textContent = k.rating;
+document.getElementById('bk-reviews').textContent = `(${k.reviews} ulasan)`;
+document.getElementById('bk-type').textContent   = k.type;
+
+document.getElementById('sidebar-photo').src     = k.photo;
+document.getElementById('sidebar-photo').alt     = k.name;
+document.getElementById('sidebar-name').textContent   = k.name;
+document.getElementById('sidebar-area').textContent   = k.area;
+document.getElementById('sidebar-stars').textContent  = k.stars;
+document.getElementById('sidebar-rating').textContent = k.rating;
+
+// ── Render kartu kamar ───────────────────────────────────────────
+let selectedPrice    = k.roomTypes[0].price;
+let selectedRoomName = k.roomTypes[0].name;
+
+function renderRoomCards() {
+  const container = document.getElementById('room-cards');
+  container.innerHTML = k.roomTypes.map((r, idx) => {
+    // Pilih kamar: dari URL ?room= jika cocok, atau kamar pertama
+    const isSelected = urlRoom
+      ? r.name.toLowerCase() === urlRoom.toLowerCase()
+      : idx === 0;
+
+    if (isSelected) {
+      selectedPrice    = r.price;
+      selectedRoomName = r.name;
+    }
+
+    return `
+    <div class="room-card border-2 ${isSelected ? 'border-green-500 bg-green-50 selected' : 'border-gray-200'} rounded-xl p-4"
+         onclick="selectRoom(this, '${r.name}', ${r.price})">
+      <div class="flex items-center gap-4">
+        <img src="${k.photo}" alt="${r.name}" class="w-20 h-16 object-cover rounded-xl flex-shrink-0" />
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded-full border-2 ${isSelected ? 'border-green-600' : 'border-gray-300'} flex items-center justify-center flex-shrink-0">
+                <div class="w-2 h-2 rounded-full ${isSelected ? 'bg-green-600' : 'bg-transparent'}" id="dot-${r.name.toLowerCase()}"></div>
+              </div>
+              <span class="font-bold text-gray-800">Kamar ${r.name}</span>
+              <span class="${r.status === 'Tersedia' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'} text-xs font-bold px-2 py-0.5 rounded-full">${r.status}</span>
+            </div>
+            <span class="font-extrabold text-green-600">${fmt(r.price)}<span class="text-xs text-gray-400 font-normal">/bln</span></span>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">${r.size} · Kasur ${r.bed} · ${r.extras.join(' · ')}</p>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Set hidden inputs
+  document.getElementById('selected-room-name').value  = selectedRoomName;
+  document.getElementById('selected-room-price').value = selectedPrice;
+  document.getElementById('summary-room').textContent  = selectedRoomName;
+  updateSummary();
+}
+
+function selectRoom(card, roomName, price) {
+  document.querySelectorAll('.room-card').forEach(c => {
+    c.classList.remove('selected', 'border-green-500', 'bg-green-50');
+    c.classList.add('border-gray-200');
+  });
+  // Reset semua dot
+  k.roomTypes.forEach(r => {
+    const dot = document.getElementById('dot-' + r.name.toLowerCase());
+    if (dot) {
+      dot.classList.remove('bg-green-600');
+      dot.classList.add('bg-transparent');
+      dot.parentElement.classList.remove('border-green-600');
+      dot.parentElement.classList.add('border-gray-300');
+    }
+  });
+
+  card.classList.add('selected', 'border-green-500', 'bg-green-50');
+  card.classList.remove('border-gray-200');
+
+  const dot = document.getElementById('dot-' + roomName.toLowerCase());
+  if (dot) {
+    dot.classList.remove('bg-transparent');
+    dot.classList.add('bg-green-600');
+    dot.parentElement.classList.remove('border-gray-300');
+    dot.parentElement.classList.add('border-green-600');
+  }
+
+  selectedPrice    = price;
+  selectedRoomName = roomName;
+  document.getElementById('selected-room-name').value  = roomName;
+  document.getElementById('selected-room-price').value = price;
+  document.getElementById('summary-room').textContent  = roomName;
+  updateSummary();
+}
+
+// ── Hitung ringkasan biaya ───────────────────────────────────────
+function updateSummary() {
+  const durationEl   = document.getElementById('duration');
+  const durationVal  = parseInt(durationEl.value);
+  const durationText = durationEl.options[durationEl.selectedIndex].text;
+  const checkinDate  = document.getElementById('checkin-date').value;
+
+  document.getElementById('summary-duration').textContent = durationText.split(' (')[0];
+
+  let discountPct = 0;
+  if (durationVal === 6)  discountPct = 0.05;
+  if (durationVal === 12) discountPct = 0.10;
+
+  const baseRent   = selectedPrice * durationVal;
+  const discAmount = Math.round(baseRent * discountPct);
+  const admin      = 50000;
+  const deposit    = 400000;
+  const total      = baseRent - discAmount + admin + deposit;
+
+  document.getElementById('rent-label').textContent  = `Sewa ${durationVal} bulan`;
+  document.getElementById('rent-amount').textContent = fmt(baseRent);
+
+  if (discAmount > 0) {
+    document.getElementById('discount-row').classList.remove('hidden');
+    document.getElementById('discount-amount').textContent = '- ' + fmt(discAmount);
+  } else {
+    document.getElementById('discount-row').classList.add('hidden');
+  }
+
+  document.getElementById('total-price').textContent = fmt(total);
+
+  if (checkinDate) {
+    const d = new Date(checkinDate);
+    document.getElementById('summary-checkin').textContent = d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+    d.setMonth(d.getMonth() + durationVal);
+    document.getElementById('summary-checkout').textContent        = d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('checkout-date-display').textContent   = d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+  } else {
+    ['summary-checkin','summary-checkout','checkout-date-display'].forEach(id => {
+      document.getElementById(id).textContent = '–';
+    });
+  }
+}
+
+function checkAgreements() {
+  const t   = document.getElementById('agree-terms').checked;
+  const p   = document.getElementById('agree-privacy').checked;
+  const r   = document.getElementById('agree-rules').checked;
+  const btn = document.getElementById('submit-btn');
+  if (t && p && r) {
+    btn.disabled = false;
+    btn.classList.remove('bg-gray-300','text-gray-500','cursor-not-allowed');
+    btn.classList.add('bg-green-600','hover:bg-green-700','text-white','cursor-pointer','shadow-md');
+  } else {
+    btn.disabled = true;
+    btn.classList.add('bg-gray-300','text-gray-500','cursor-not-allowed');
+    btn.classList.remove('bg-green-600','hover:bg-green-700','text-white','cursor-pointer','shadow-md');
+  }
+}
+
+function submitBooking() {
+  const nama    = document.getElementById('nama').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const phone   = document.getElementById('phone').value.trim();
+  const gender  = document.getElementById('gender').value;
+  const birth   = document.getElementById('birthdate').value;
+  const job     = document.getElementById('job').value;
+  const alamat  = document.getElementById('alamat').value.trim();
+  const checkin = document.getElementById('checkin-date').value;
+
+  if (!nama || !email || !phone || !gender || !birth || !job || !alamat || !checkin) {
+    alert('Mohon lengkapi semua data yang wajib diisi (bertanda *)');
+    return;
+  }
+
+  const dur      = document.getElementById('duration');
+  const durVal   = parseInt(dur.value);
+  const durLabel = dur.options[dur.selectedIndex].text.split(' (')[0];
+
+  const discountPct = durVal === 6 ? 0.05 : durVal === 12 ? 0.10 : 0;
+  const baseRent    = selectedPrice * durVal;
+  const discAmount  = Math.round(baseRent * discountPct);
+  const total       = baseRent - discAmount + 50000 + 400000;
+
+  // ── Simpan bookingData ke localStorage ──────────────────────
+  const bookingData = {
+    kostId:       kostId,
+    kostName:     k.name,
+    kostPhoto:    k.photo,
+    kostArea:     k.area,
+    kostAddress:  k.address,
+    kostType:     k.type,
+    kostRating:   k.rating,
+    kostStars:    k.stars,
+    kostReviews:  k.reviews,
+    roomType:     selectedRoomName,
+    roomPrice:    selectedPrice,
+    nama:         nama,
+    telepon:      phone,
+    email:        email,
+    gender:       gender,
+    birthdate:    birth,
+    job:          job,
+    instansi:     document.getElementById('instansi').value.trim(),
+    alamat:       alamat,
+    emergencyName:  document.getElementById('emergency-name').value.trim(),
+    emergencyPhone: document.getElementById('emergency-phone').value.trim(),
+    catatan:      document.getElementById('catatan').value.trim(),
+    tanggalMasuk: checkin,
+    durasi:       durVal,
+    durasiLabel:  durLabel,
+    subtotal:     baseRent,
+    diskon:       discAmount,
+    admin:        50000,
+    deposit:      400000,
+    total:        total
+  };
+
+  localStorage.setItem('bookingData', JSON.stringify(bookingData));
+  localStorage.setItem('selectedKost', kostId);
+
+  // Navigasi ke transaksi dengan parameter id + room
+  window.location.href = `transaksi.html?id=${kostId}&room=${encodeURIComponent(selectedRoomName)}`;
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+renderRoomCards();
+</script>
+
+</body>
+</html>

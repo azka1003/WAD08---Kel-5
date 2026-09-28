@@ -82,4 +82,22 @@ class UserController extends Controller
         'data' => $user
     ]);
 }
+
+public function show(string $id)
+{
+    $user = User::find($id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Pengguna tidak ditemukan'
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'data' => $user
+    ]);
+}
+
 }

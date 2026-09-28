@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\KostController;
+use App\Http\Controllers\Api\UserController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -12,3 +13,5 @@ Route::get('/test', function () {
 
 Route::get('/kost', [KostController::class, 'index']);
 Route::get('/kost/{id}', [KostController::class, 'show']);
+
+Route::get('/users', [UserController::class, 'index']);

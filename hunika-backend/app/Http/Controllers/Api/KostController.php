@@ -3,47 +3,34 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Kost;
 
 class KostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $kosts = Kost::all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $kosts
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
-    }
+        $kost = Kost::find($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        if (!$kost) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kost tidak ditemukan'
+            ], 404);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $kost
+        ]);
     }
 }

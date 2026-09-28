@@ -100,4 +100,34 @@ public function show(string $id)
     ]);
 }
 
+public function update(Request $request, string $id)
+{
+    $user = User::find($id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Pengguna tidak ditemukan'
+        ], 404);
+    }
+
+    $request->validate([
+        'name' => 'sometimes|string',
+        'email' => 'sometimes|email|unique:users,email,' . $id,
+        'password' => 'sometimes|min:8',
+    ]);
+
+    $user->update($request->only([
+        'name',
+        'email',
+        'password'
+    ]));
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Profil pengguna berhasil diperbarui',
+        'data' => $user
+    ]);
+}
+
 }

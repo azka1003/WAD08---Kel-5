@@ -17,3 +17,4 @@ Route::get('/kost/{id}', [KostController::class, 'show']);
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
 Route::post('/register', [UserController::class, 'register']);
+Route::post('/login', [UserController::class, 'login']);

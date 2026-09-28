@@ -59,4 +59,27 @@ class UserController extends Controller
             'data' => $user
         ], 201);
     }
+
+    public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user || !\Hash::check($request->password, $user->password)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Email atau password salah'
+        ], 401);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Login berhasil',
+        'data' => $user
+    ]);
+}
 }

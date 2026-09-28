@@ -15,3 +15,4 @@ Route::get('/kost', [KostController::class, 'index']);
 Route::get('/kost/{id}', [KostController::class, 'show']);
 
 Route::get('/users', [UserController::class, 'index']);
+Route::post('/users', [UserController::class, 'store']);

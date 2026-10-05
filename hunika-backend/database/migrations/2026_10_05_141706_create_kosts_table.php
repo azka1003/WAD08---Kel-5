@@ -9,7 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kosts', function (Blueprint $table) {
-            $table->id();
+            // Kolom ID diatur sebagai string tanpa auto-increment
+            $table->string('id')->primary(); 
+            
+            // Kolom owner_id dibuat biasa tanpa Foreign Key constraint 
+            // untuk mencegah error karena tabel 'owners' belum kita buat
+            $table->string('owner_id'); 
+            
+            // Kolom-kolom lainnya berdasarkan ERD
             $table->string('name');
             $table->text('address');
             $table->string('area');

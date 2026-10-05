@@ -20,15 +20,13 @@ return new class extends Migration
             $table->string('name');
             $table->text('address');
             $table->string('area');
-            $table->string('type'); // Contoh: 'Putra', 'Putri', 'Campur'
             $table->float('rating')->default(0);
             $table->integer('reviews')->default(0);
-            $table->integer('price');
-            $table->string('years')->nullable();
+            $table->decimal('price', 12, 2);
+            $table->integer('rooms')->default(1);
+            $table->integer('years')->nullable();
             $table->text('description')->nullable();
             $table->string('img')->nullable();
-            
-            // Otomatis membuat kolom created_at dan updated_at
             $table->timestamps();
         });
     }

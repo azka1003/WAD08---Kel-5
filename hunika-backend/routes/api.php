@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\KostSearchController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 // Testing Route
@@ -33,3 +34,8 @@ Route::get('/kost/search', [KostSearchController::class, 'search']);
 Route::get('/kost/filter', [KostSearchController::class, 'filter']);
 
 Route::get('/kost', [KostSearchController::class, 'indexArea']);
+
+Route::post('/payments', [PaymentController::class, 'store']);
+Route::get('/payments/{id}', [PaymentController::class, 'show']);
+Route::put('/payments/{id}', [PaymentController::class, 'updateStatus']);
+Route::post('/payments/{id}/proof', [PaymentController::class, 'uploadProof']);

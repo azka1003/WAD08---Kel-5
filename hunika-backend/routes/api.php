@@ -6,9 +6,7 @@ use App\Http\Controllers\Api\KostController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\KostSearchController;
-use App\Http\Controllers\PaymentController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\KostSearchController;
 
 // Testing Route
 Route::get('/test', function () {

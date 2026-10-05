@@ -9,19 +9,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kosts', function (Blueprint $table) {
-            $table->id();
+            // Kolom ID diatur sebagai string tanpa auto-increment
+            $table->string('id')->primary(); 
+            
+            // Kolom owner_id dibuat biasa tanpa Foreign Key constraint 
+            // untuk mencegah error karena tabel 'owners' belum kita buat
+            $table->string('owner_id'); 
+            
+            // Kolom-kolom lainnya berdasarkan ERD
             $table->string('name');
             $table->text('address');
             $table->string('area');
-            $table->string('type');
-            $table->string('tier');
-            $table->decimal('rating', 2, 1)->default(0);
-            $table->unsignedInteger('reviews')->default(0);
-            $table->unsignedInteger('price');
-            $table->unsignedInteger('rooms')->default(0);
-            $table->unsignedInteger('years')->default(0);
-            $table->text('desc1')->nullable();
-            $table->text('desc2')->nullable();
+            $table->string('type'); // Contoh: 'Putra', 'Putri', 'Campur'
+            $table->float('rating')->default(0);
+            $table->integer('reviews')->default(0);
+            $table->integer('price');
+            $table->string('years')->nullable();
+            $table->text('description')->nullable();
+            $table->string('img')->nullable();
+            
+            // Otomatis membuat kolom created_at dan updated_at
             $table->timestamps();
         });
     }

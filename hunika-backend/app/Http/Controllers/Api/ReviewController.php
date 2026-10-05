@@ -6,18 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Kost;
 use App\Models\Review;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class ReviewController extends Controller
 {
-    // GET /api/kost/{id}/reviews
+    // Mengambil semua ulasan untuk 1 kost
     public function index($kostId)
     {
-        $kost = Kost::findById($kostId);
+        $kost = Kost::getById($kostId);
 
         if (!$kost) {
             return response()->json([
-                'status' => 'error',
+                'status'  => false,
                 'message' => 'Kost tidak ditemukan'
             ], 404);
         }
@@ -25,96 +24,64 @@ class ReviewController extends Controller
         $reviews = Review::getByKostId($kostId);
 
         return response()->json([
-            'status' => 'success',
-            'data'   => $reviews
+            'status'  => true,
+            'message' => 'Berhasil mengambil ulasan kost',
+            'data'    => $reviews
         ], 200);
     }
 
-    // POST /api/kost/{id}/reviews
+    // Menambah ulasan baru
     public function store(Request $request, $kostId)
     {
-        $kost = Kost::findById($kostId);
+        $kost = Kost::getById($kostId);
 
         if (!$kost) {
             return response()->json([
-                'status' => 'error',
+                'status'  => false,
                 'message' => 'Kost tidak ditemukan'
             ], 404);
         }
 
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'user_id' => 'required|integer|exists:users,id',
             'rating'  => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        $validated['kost_id'] = $kostId;
 
-        $data = $request->all();
-        $data['kost_id'] = $kostId;
+        $review = Review::create($validated);
 
-        Review::create($data);
+        // Update rating rata-rata & total review di tabel kosts
+        Kost::recalculateRating($kostId);
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Review berhasil ditambahkan'
+            'status'  => true,
+            'message' => 'Ulasan berhasil ditambahkan',
+            'data'    => $review
         ], 201);
     }
 
-    // PUT /api/reviews/{id}
-    public function update(Request $request, $id)
-    {
-        $review = Review::findById($id);
-
-        if (!$review) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Review tidak ditemukan'
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'rating'  => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        Review::update($id, $request->all());
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Review berhasil diperbarui'
-        ], 200);
-    }
-
-    // DELETE /api/reviews/{id}
+    // Menghapus ulasan
     public function destroy($id)
     {
-        $review = Review::findById($id);
+        $review = Review::getById($id);
 
         if (!$review) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Review tidak ditemukan'
+                'status'  => false,
+                'message' => 'Ulasan tidak ditemukan'
             ], 404);
         }
 
         Review::delete($id);
 
+        // Update ulang rating rata-rata & total review di tabel kosts
+        Kost::recalculateRating($review->kost_id);
+
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Review berhasil dihapus'
+            'status'  => true,
+            'message' => 'Ulasan berhasil dihapus'
         ], 200);
     }
 }

@@ -13,15 +13,13 @@ return new class extends Migration
             $table->string('name');
             $table->text('address');
             $table->string('area');
-            $table->string('type');
-            $table->string('tier');
-            $table->decimal('rating', 2, 1)->default(0);
-            $table->unsignedInteger('reviews')->default(0);
-            $table->unsignedInteger('price');
-            $table->unsignedInteger('rooms')->default(0);
-            $table->unsignedInteger('years')->default(0);
-            $table->text('desc1')->nullable();
-            $table->text('desc2')->nullable();
+            $table->float('rating')->default(0);
+            $table->integer('reviews')->default(0);
+            $table->decimal('price', 12, 2);
+            $table->integer('rooms')->default(1);
+            $table->integer('years')->nullable();
+            $table->text('description')->nullable();
+            $table->string('img')->nullable();
             $table->timestamps();
         });
     }

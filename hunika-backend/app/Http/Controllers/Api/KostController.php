@@ -1,151 +1,102 @@
 <?php
-namespace App\Http\Controllers\Api;
 
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kost;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class KostController extends Controller
 {
-    // GET /api/kost
     public function index(Request $request)
     {
-        if ($request->hasAny(['keyword', 'area', 'type', 'tier'])) {
-            $kosts = Kost::searchAndFilter(
-                $request->query('keyword'),
-                $request->query('area'),
-                $request->query('type'),
-                $request->query('tier')
-            );
-        } else {
-            $kosts = Kost::getAll();
-        }
+        $kosts = Kost::getAll($request->query('search'));
 
         return response()->json([
-            'status' => 'success',
-            'data' => $kosts
+            'status'  => true,
+            'message' => 'Berhasil mengambil daftar kost',
+            'data'    => $kosts
         ], 200);
     }
 
-    // GET /api/kost/{id}
     public function show($id)
     {
-        $kost = Kost::findById($id);
+        $kost = Kost::getById($id);
 
         if (!$kost) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Kost tidak ditemukan'
+                'status'  => false,
+                'message' => 'Data kost tidak ditemukan'
             ], 404);
         }
 
         return response()->json([
-            'status' => 'success',
-            'data' => $kost
+            'status'  => true,
+            'message' => 'Berhasil mengambil detail kost',
+            'data'    => $kost
         ], 200);
     }
 
-    // POST /api/kost
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'address'     => 'required|string',
-            'area'        => 'required|string|max:100',
-            'type'        => 'required|in:kos,kontrakan',
-            'tier'        => 'required|in:basic,standard,premium',
-            'price'       => 'required|numeric|min:0',
-            'rooms'       => 'required|integer|min:1',
-            'years'       => 'nullable|integer|min:0',
+            'area'        => 'required|string|max:255',
+            'price'       => 'required|numeric',
+            'rooms'       => 'nullable|integer',
+            'years'       => 'nullable|integer',
             'description' => 'nullable|string',
-            'img'         => 'nullable|string|url',
+            'img'         => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        Kost::create($request->all());
+        $kost = Kost::create($validated);
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Kost berhasil ditambahkan'
+            'status'  => true,
+            'message' => 'Kost berhasil ditambahkan',
+            'data'    => $kost
         ], 201);
     }
 
-    // PUT /api/kost/{id}
     public function update(Request $request, $id)
     {
-        $kost = Kost::findById($id);
-
-        if (!$kost) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Kost tidak ditemukan'
-            ], 404);
+        $kostExists = Kost::getById($id);
+        if (!$kostExists) {
+            return response()->json(['status' => false, 'message' => 'Kost tidak ditemukan'], 404);
         }
 
-        $validator = Validator::make($request->all(), [
-            'name'        => 'required|string|max:255',
-            'address'     => 'required|string',
-            'area'        => 'required|string|max:100',
-            'type'        => 'required|in:kos,kontrakan',
-            'tier'        => 'required|in:basic,standard,premium',
-            'price'       => 'required|numeric|min:0',
-            'rooms'       => 'required|integer|min:1',
-            'years'       => 'nullable|integer|min:0',
+        $validated = $request->validate([
+            'name'        => 'sometimes|string|max:255',
+            'address'     => 'sometimes|string',
+            'area'        => 'sometimes|string',
+            'price'       => 'sometimes|numeric',
+            'rooms'       => 'nullable|integer',
+            'years'       => 'nullable|integer',
             'description' => 'nullable|string',
-            'img'         => 'nullable|string|url',
+            'img'         => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        Kost::update($id, $request->all());
+        $updatedKost = Kost::update($id, $validated);
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Data kost berhasil diperbarui'
+            'status'  => true,
+            'message' => 'Data kost berhasil diperbarui',
+            'data'    => $updatedKost
         ], 200);
     }
 
-    // DELETE /api/kost/{id}
     public function destroy($id)
     {
-        $kost = Kost::findById($id);
+        $deleted = Kost::delete($id);
 
-        if (!$kost) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Kost tidak ditemukan'
-            ], 404);
+        if (!$deleted) {
+            return response()->json(['status' => false, 'message' => 'Kost gagal dihapus/tidak ditemukan'], 404);
         }
 
-        Kost::delete($id);
-
         return response()->json([
-            'status'  => 'success',
+            'status'  => true,
             'message' => 'Kost berhasil dihapus'
-        ], 200);
-    }
-
-    // GET /api/kost/{id}/fasilitas
-    public function facilities($id)
-    {
-        $facilities = Kost::getFacilities($id);
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => $facilities
         ], 200);
     }
 }

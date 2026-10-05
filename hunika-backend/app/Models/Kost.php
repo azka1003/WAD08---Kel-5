@@ -6,105 +6,78 @@ use Illuminate\Support\Facades\DB;
 
 class Kost
 {
-    public static function getAll()
+    // Ambil semua data kost
+    public static function getAll($search = null)
     {
-        return DB::select("SELECT * FROM kosts ORDER BY created_at DESC");
+        $query = DB::table('kosts');
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'ILIKE', "%{$search}%")
+                  ->orWhere('area', 'ILIKE', "%{$search}%")
+                  ->orWhere('address', 'ILIKE', "%{$search}%");
+            });
+        }
+
+        return $query->orderBy('id', 'desc')->get();
     }
 
-    public static function findById($id)
+    // Ambil detail 1 kost berdasarkan ID
+    public static function getById($id)
     {
-        $result = DB::select("SELECT * FROM kosts WHERE id = ?", [$id]);
-        return $result ? $result[0] : null;
+        return DB::table('kosts')->where('id', $id)->first();
     }
 
-    public static function searchAndFilter($keyword = null, $area = null, $type = null, $tier = null)
-    {
-        $query = "SELECT * FROM kosts WHERE 1=1";
-        $params = [];
-
-        if (!empty($keyword)) {
-            $query .= " AND (name ILIKE ? OR address ILIKE ?)";
-            $params[] = "%{$keyword}%";
-            $params[] = "%{$keyword}%";
-        }
-
-        if (!empty($area)) {
-            $query .= " AND area ILIKE ?";
-            $params[] = "%{$area}%";
-        }
-
-        if (!empty($type)) {
-            $query .= " AND type = ?";
-            $params[] = $type;
-        }
-
-        if (!empty($tier)) {
-            $query .= " AND tier = ?";
-            $params[] = $tier;
-        }
-
-        $query .= " ORDER BY created_at DESC";
-
-        return DB::select($query, $params);
-    }
-
+    // Tambah Kost Baru
     public static function create(array $data)
     {
-        $now = now();
-        return DB::insert("
-            INSERT INTO kosts (name, address, area, type, tier, price, rooms, years, description, img, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ", [
-            $data['name'],
-            $data['address'],
-            $data['area'],
-            $data['type'],
-            $data['tier'],
-            $data['price'],
-            $data['rooms'],
-            $data['years'] ?? 0,
-            $data['description'] ?? null,
-            $data['img'] ?? null,
-            $now,
-            $now
+        $id = DB::table('kosts')->insertGetId([
+            'name'        => $data['name'],
+            'address'     => $data['address'],
+            'area'        => $data['area'],
+            'rating'      => 0,
+            'reviews'     => 0,
+            'price'       => $data['price'],
+            'rooms'       => $data['rooms'] ?? 1,
+            'years'       => $data['years'] ?? null,
+            'description' => $data['description'] ?? null,
+            'img'         => $data['img'] ?? null,
+            'created_at'  => now(),
+            'updated_at'  => now(),
         ]);
+
+        return static::getById($id);
     }
 
+    // Update Data Kost
     public static function update($id, array $data)
     {
-        $now = now();
-        return DB::update("
-            UPDATE kosts 
-            SET name = ?, address = ?, area = ?, type = ?, tier = ?, price = ?, rooms = ?, years = ?, description = ?, img = ?, updated_at = ?
-            WHERE id = ?
-        ", [
-            $data['name'],
-            $data['address'],
-            $data['area'],
-            $data['type'],
-            $data['tier'],
-            $data['price'],
-            $data['rooms'],
-            $data['years'] ?? 0,
-            $data['description'] ?? null,
-            $data['img'] ?? null,
-            $now,
-            $id
-        ]);
+        $data['updated_at'] = now();
+        DB::table('kosts')->where('id', $id)->update($data);
+
+        return static::getById($id);
     }
 
+    // Hapus Kost
     public static function delete($id)
     {
-        return DB::delete("DELETE FROM kosts WHERE id = ?", [$id]);
+        return DB::table('kosts')->where('id', $id)->delete();
     }
 
-    public static function getFacilities($kostId)
+    // Hitung Ulang Rating & Jumlah Review
+    public static function recalculateRating($kostId)
     {
-        return DB::select("
-            SELECT f.id, f.name 
-            FROM facilities f
-            JOIN kost_facilities kf ON f.id = kf.facility_id
-            WHERE kf.kost_id = ?
-        ", [$kostId]);
+        $stats = DB::table('reviews')
+            ->where('kost_id', $kostId)
+            ->selectRaw('COALESCE(AVG(rating), 0) as avg_rating, COUNT(id) as total_reviews')
+            ->first();
+
+        DB::table('kosts')
+            ->where('id', $kostId)
+            ->update([
+                'rating'     => round($stats->avg_rating, 1),
+                'reviews'    => $stats->total_reviews,
+                'updated_at' => now(),
+            ]);
     }
 }

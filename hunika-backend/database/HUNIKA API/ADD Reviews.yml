@@ -1,0 +1,23 @@
+info:
+  name: ADD Reviews
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://127.0.0.1:8000/api/kost/1/reviews
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 1,
+        "rating": 5,
+        "comment": "Kosan aman, nyaman, dan bersih!"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

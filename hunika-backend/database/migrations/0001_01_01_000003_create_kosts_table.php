@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('area');
             $table->float('rating')->default(0);
             $table->integer('reviews')->default(0);
+            $table->string('facilities');
             $table->decimal('price', 12, 2);
             $table->integer('rooms')->default(1);
             $table->integer('years')->nullable();

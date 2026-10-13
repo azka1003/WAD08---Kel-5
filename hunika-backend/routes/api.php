@@ -22,7 +22,6 @@ Route::put('/kost/{id}', [KostController::class, 'update']);
 Route::delete('/kost/{id}', [KostController::class, 'destroy']);
 Route::get('/kost/{id}/fasilitas', [KostController::class, 'facilities']);
 
-// Fitur Review
 Route::get('/kost/{id}/reviews', [ReviewController::class, 'index']);
 Route::post('/kost/{id}/reviews', [ReviewController::class, 'store']);
 Route::put('/reviews/{id}', [ReviewController::class, 'update']);

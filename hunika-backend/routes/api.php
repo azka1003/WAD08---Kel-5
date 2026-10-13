@@ -22,13 +22,11 @@ Route::put('/kost/{id}', [KostController::class, 'update']);
 Route::delete('/kost/{id}', [KostController::class, 'destroy']);
 Route::get('/kost/{id}/fasilitas', [KostController::class, 'facilities']);
 
-<<<<<<< HEAD
 // Fitur Review
 Route::get('/kost/{id}/reviews', [ReviewController::class, 'index']);
 Route::post('/kost/{id}/reviews', [ReviewController::class, 'store']);
 Route::put('/reviews/{id}', [ReviewController::class, 'update']);
 Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
-=======
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
@@ -45,4 +43,3 @@ Route::post('/payments', [PaymentController::class, 'store']);
 Route::get('/payments/{id}', [PaymentController::class, 'show']);
 Route::put('/payments/{id}', [PaymentController::class, 'updateStatus']);
 Route::post('/payments/{id}/proof', [PaymentController::class, 'uploadProof']);
->>>>>>> 2d1eedadb7b3ace18793fc2496797f88a308b010

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getKostById, fmt } from '../data/dataKost'
-import Navbar from '../components/Navbar'
-import Breadcrumb from '../components/Breadcrumb'
+import { getKostById, fmt } from '../../data/dataKost'
+import Navbar from '../../components/Navbar'
+import Breadcrumb from '../../components/Breadcrumb'
 
 export default function DetailPage() {
   const { id } = useParams()

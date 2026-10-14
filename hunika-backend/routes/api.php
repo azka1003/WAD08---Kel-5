@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\KostController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\KostSearchController;
+use App\Http\Controllers\Api\AuthController;
 
 // Testing Route
 Route::get('/test', function () {
@@ -43,3 +44,6 @@ Route::post('/payments', [PaymentController::class, 'store']);
 Route::get('/payments/{id}', [PaymentController::class, 'show']);
 Route::put('/payments/{id}', [PaymentController::class, 'updateStatus']);
 Route::post('/payments/{id}/proof', [PaymentController::class, 'uploadProof']);
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);

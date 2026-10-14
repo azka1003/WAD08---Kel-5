@@ -13,7 +13,7 @@ class KostController extends Controller
     public function index()
     {
         // SELECT * otomatis akan mengambil kolom facilities juga
-        $kosts = DB::select('SELECT * FROM kosts');
+        $kosts = DB::select('SELECT * FROM kosts ORDER BY id ASC');
         return response()->json(['data' => $kosts], 200);
     }
 

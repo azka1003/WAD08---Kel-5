@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('reviews')->default(0);
             $table->string('facilities');
             $table->decimal('price', 12, 2);
-            $table->integer('rooms')->default(1);
+            $table->integer('rooms')->nullable();
             $table->integer('years')->nullable();
             $table->text('description')->nullable();
             $table->string('img')->nullable();

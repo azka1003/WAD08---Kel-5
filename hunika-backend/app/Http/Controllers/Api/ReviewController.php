@@ -3,25 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Kost;
-use App\Models\Review;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
-    // Mengambil semua ulasan untuk 1 kost
+    // 1. Mengambil semua ulasan untuk 1 kost
     public function index($kostId)
     {
-        $kost = Kost::getById($kostId);
+        $kost = DB::select('SELECT id FROM kosts WHERE id = ?', [$kostId]);
 
-        if (!$kost) {
+        if (empty($kost)) {
             return response()->json([
                 'status'  => false,
                 'message' => 'Kost tidak ditemukan'
             ], 404);
         }
 
-        $reviews = Review::getByKostId($kostId);
+        // Ambil review beserta nama user yang mereview
+        $reviews = DB::select('
+            SELECT r.*, u.name as reviewer_name 
+            FROM reviews r 
+            JOIN users u ON r.user_id = u.id 
+            WHERE r.kost_id = ? 
+            ORDER BY r.created_at DESC
+        ', [$kostId]);
 
         return response()->json([
             'status'  => true,
@@ -30,58 +36,117 @@ class ReviewController extends Controller
         ], 200);
     }
 
-    // Menambah ulasan baru
+    // 2. Menambah ulasan baru
     public function store(Request $request, $kostId)
     {
-        $kost = Kost::getById($kostId);
+        $kost = DB::select('SELECT id FROM kosts WHERE id = ?', [$kostId]);
 
-        if (!$kost) {
+        if (empty($kost)) {
             return response()->json([
                 'status'  => false,
                 'message' => 'Kost tidak ditemukan'
             ], 404);
         }
 
-        $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
-            'rating'  => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string',
-        ]);
+        // Validasi Manual
+        $rating = $request->input('rating');
+        if (!$rating || $rating < 1 || $rating > 5) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Rating wajib diisi angka antara 1 sampai 5'
+            ], 400);
+        }
 
-        $validated['kost_id'] = $kostId;
+        // Ambil user_id dengan aman dari Token JWT, BUKAN dari inputan Postman
+        $userId = $request->auth->sub; 
+        
+        // Generate ID Review Manual berurutan (REV-001, dst)
+        $lastReview = DB::select("SELECT id FROM reviews ORDER BY id DESC LIMIT 1");
+        if (empty($lastReview)) {
+            $id = 'REV-001';
+        } else {
+            $lastId = $lastReview[0]->id;
+            $lastNumber = (int) substr($lastId, 4);
+            $id = 'REV-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        }
 
-        $review = Review::create($validated);
+        $now = now();
+        $comment = $request->input('comment', '');
 
-        // Update rating rata-rata & total review di tabel kosts
-        Kost::recalculateRating($kostId);
+        try {
+            // Insert Review
+            DB::insert('INSERT INTO reviews (id, kost_id, user_id, rating, comment, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+                $id, $kostId, $userId, $rating, $comment, $now, $now
+            ]);
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Ulasan berhasil ditambahkan',
-            'data'    => $review
-        ], 201);
+            // Update rating rata-rata & total review di tabel kosts
+            // COALESCE digunakan agar jika tidak ada review, rating kembali ke 0 (bukan null)
+            DB::update('UPDATE kosts SET 
+                reviews = (SELECT COUNT(*) FROM reviews WHERE kost_id = ?),
+                rating = (SELECT COALESCE(ROUND(AVG(rating), 1), 0) FROM reviews WHERE kost_id = ?)
+                WHERE id = ?', [$kostId, $kostId, $kostId]);
+
+            // Ambil data yang baru saja diinsert untuk dikembalikan ke respons
+            $newReview = DB::select('SELECT * FROM reviews WHERE id = ?', [$id])[0];
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Ulasan berhasil ditambahkan',
+                'data'    => $newReview
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal menambah ulasan',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 
-    // Menghapus ulasan
-    public function destroy($id)
+    // 3. Menghapus ulasan
+    public function destroy(Request $request, $id)
     {
-        $review = Review::getById($id);
+        $review = DB::select('SELECT * FROM reviews WHERE id = ?', [$id]);
 
-        if (!$review) {
+        if (empty($review)) {
             return response()->json([
                 'status'  => false,
                 'message' => 'Ulasan tidak ditemukan'
             ], 404);
         }
 
-        Review::delete($id);
+        $reviewData = $review[0];
 
-        // Update ulang rating rata-rata & total review di tabel kosts
-        Kost::recalculateRating($review->kost_id);
+        // KEAMANAN TAMBAHAN: Cek apakah user yang mau menghapus adalah pemilik ulasan ATAU Admin
+        if ($reviewData->user_id !== $request->auth->sub && $request->auth->is_admin !== true) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Akses ditolak. Anda hanya bisa menghapus ulasan milik Anda sendiri.'
+            ], 403);
+        }
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Ulasan berhasil dihapus'
-        ], 200);
+        try {
+            // Hapus Ulasan
+            DB::delete('DELETE FROM reviews WHERE id = ?', [$id]);
+
+            // Update ulang rating rata-rata & total review di tabel kosts
+            DB::update('UPDATE kosts SET 
+                reviews = (SELECT COUNT(*) FROM reviews WHERE kost_id = ?),
+                rating = (SELECT COALESCE(ROUND(AVG(rating), 1), 0) FROM reviews WHERE kost_id = ?)
+                WHERE id = ?', [$reviewData->kost_id, $reviewData->kost_id, $reviewData->kost_id]);
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Ulasan berhasil dihapus'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal menghapus ulasan',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }

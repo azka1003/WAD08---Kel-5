@@ -24,15 +24,17 @@ Route::delete('/kost/{id}', [KostController::class, 'destroy']);
 Route::get('/kost/{id}/fasilitas', [KostController::class, 'facilities']);
 
 // Fitur Review
-Route::get('/kost/{id}/reviews', [ReviewController::class, 'index']);
-Route::post('/kost/{id}/reviews', [ReviewController::class, 'store']);
-Route::put('/reviews/{id}', [ReviewController::class, 'update']);
-Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+Route::get('/kost/{kost_id}/reviews', [ReviewController::class, 'index']);
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::post('/payments/{booking_id}', [PaymentController::class, 'uploadProof']);
     Route::post('/reviews', [ReviewController::class, 'store']);
+});
+
+Route::middleware(['jwt'])->group(function () {
+    Route::post('/kost/{kost_id}/reviews', [ReviewController::class, 'store']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']); // <-- Rute Hapus Review
 });
 
 Route::get('/kost/search', [KostSearchController::class, 'search']);

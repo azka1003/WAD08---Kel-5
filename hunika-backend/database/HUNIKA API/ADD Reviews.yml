@@ -4,17 +4,14 @@ info:
   seq: 1
 
 http:
-  method: POST
-  url: http://127.0.0.1:8000/api/kost/1/reviews
+  method: DELETE
+  url: http://127.0.0.1:8000/api/kost/KST-001/
   body:
     type: json
-    data: |-
-      {
-        "user_id": 1,
-        "rating": 5,
-        "comment": "Kosan aman, nyaman, dan bersih!"
-      }
-  auth: inherit
+    data: ""
+  auth:
+    type: bearer
+    token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodW5pa2EtYmFja2VuZCIsInN1YiI6IkFETS0wMDEiLCJpc19hZG1pbiI6dHJ1ZSwiaWF0IjoxNzkxOTYxNDQ2LCJleHAiOjE3OTIwNDc4NDZ9.fND3y2MXOFsDg9QqZNvlLGJEkHBVUS91cWKUHFjIlMQ
 
 settings:
   encodeUrl: true

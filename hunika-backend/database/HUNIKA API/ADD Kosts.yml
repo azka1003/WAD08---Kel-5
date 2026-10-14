@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://127.0.0.1:8000/api/kost
+  url: http://127.0.0.1:8000/api/kost/
   body:
     type: json
     data: |-
@@ -13,9 +13,12 @@ http:
         "name": "Kost Mawar",
         "address": "Jl. Raya Kemang",
         "area": "Jakarta",
-        "price": 1500000
+        "price": 1500000,
+        "facilities": "AC, WIFI"
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodW5pa2EtYmFja2VuZCIsInN1YiI6IkFETS0wMDEiLCJpc19hZG1pbiI6dHJ1ZSwiaWF0IjoxNzkxOTUyMTc4LCJleHAiOjE3OTIwMzg1Nzh9.6gaZYfgfMzzzDGXHX-nCf1P6yQwWqQUK7rE9BTDMkAc
 
 settings:
   encodeUrl: true

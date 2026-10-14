@@ -47,3 +47,10 @@ Route::post('/payments/{id}/proof', [PaymentController::class, 'uploadProof']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// --- API TERTUTUP (Wajib Token & Wajib Admin) ---
+Route::middleware(['jwt', 'admin'])->group(function () {
+    Route::post('/kost', [KostController::class, 'store']);    // Tambah kost
+    Route::put('/kost/{id}', [KostController::class, 'update']); // Ubah kost
+    Route::delete('/kost/{id}', [KostController::class, 'destroy']); // Hapus kost
+});

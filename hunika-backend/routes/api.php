@@ -55,4 +55,5 @@ Route::middleware(['jwt', 'admin'])->group(function () {
     Route::post('/kost', [KostController::class, 'store']);    // Tambah kost
     Route::put('/kost/{id}', [KostController::class, 'update']); // Ubah kost
     Route::delete('/kost/{id}', [KostController::class, 'destroy']); // Hapus kost
+    Route::delete('/users/{id}', [AuthController::class, 'destroy']);
 });

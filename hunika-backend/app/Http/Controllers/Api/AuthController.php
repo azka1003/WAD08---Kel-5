@@ -27,8 +27,28 @@ class AuthController extends Controller
             return response()->json(['message' => 'Email sudah digunakan'], 409);
         }
 
-        // 3. Generate ID Manual dan Enkripsi Password
-        $id = 'USR-' . strtoupper(Str::random(6)); // Contoh: USR-B7X9Q1
+        // 3. Generate ID Manual Berurutan (Contoh: USR-001)
+        $lastUser = DB::select("SELECT id FROM users ORDER BY id DESC LIMIT 1");
+        
+        if (empty($lastUser)) {
+            $id = 'USR-001';
+        } else {
+            // Ambil ID terakhir, misal "USR-005" atau "ADM-001"
+            $lastId = $lastUser[0]->id;
+            
+            // Ambil hanya karakter angka di ujungnya menggunakan ekspresi reguler
+            // Ini untuk mencegah error jika format huruf depannya beda (misal ada akun 'ADM-001')
+            preg_match('/(\d+)$/', $lastId, $matches);
+            
+            if (isset($matches[1])) {
+                $lastNumber = (int) $matches[1];
+                $id = 'USR-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+            } else {
+                // Fallback jika format ID terakhir tidak dikenali
+                $id = 'USR-001';
+            }
+        }
+
         $hashedPassword = Hash::make($request->input('password'));
         $now = now();
 
@@ -104,5 +124,23 @@ class AuthController extends Controller
                 'is_admin' => (bool) $user->is_admin
             ]
         ], 200);
+    }
+
+    // Fungsi Hapus User
+    public function destroy($id)
+    {
+        // Cek apakah user ada
+        $user = DB::select('SELECT id FROM users WHERE id = ?', [$id]);
+
+        if (empty($user)) {
+            return response()->json(['message' => 'User tidak ditemukan'], 404);
+        }
+
+        try {
+            DB::delete('DELETE FROM users WHERE id = ?', [$id]);
+            return response()->json(['message' => 'Akun user berhasil dihapus'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal menghapus user', 'error' => $e->getMessage()], 500);
+        }
     }
 }

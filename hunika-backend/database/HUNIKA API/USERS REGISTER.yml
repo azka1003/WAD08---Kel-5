@@ -1,0 +1,24 @@
+info:
+  name: USERS REGISTER
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://127.0.0.1:8000/api/register/USR-F7IQYH
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Budi",
+        "email": "budi12@example.com",
+        "password": "password123",
+        "phone": "08543212332"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

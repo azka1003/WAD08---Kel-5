@@ -1,0 +1,23 @@
+info:
+  name: STATUS UPDATE FOR PAYMENT
+  type: http
+  seq: 1
+
+http:
+  method: PUT
+  url: http://127.0.0.1:8000/api/payments/PAY-001
+  body:
+    type: json
+    data: |-
+      {
+        "status": "success"
+      }
+  auth:
+    type: bearer
+    token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodW5pa2EtYmFja2VuZCIsInN1YiI6IkFETS0wMDEiLCJpc19hZG1pbiI6dHJ1ZSwiaWF0IjoxNzkyMjMwNTc0LCJleHAiOjE3OTIzMTY5NzR9.SXV7pgAt_9LMQlrukHYEBqKHyPCCKpcK88FvIzFf1lY
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

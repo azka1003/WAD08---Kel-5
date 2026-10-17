@@ -1,0 +1,23 @@
+info:
+  name: PAYMENT
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://127.0.0.1:8000/api/payments/PAY-001/proof
+  body:
+    type: json
+    data: |-
+      {
+        "proof": "https://imgur.com/contoh-struk-transfer.jpg"
+      }
+  auth:
+    type: bearer
+    token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodW5pa2EtYmFja2VuZCIsInN1YiI6IlVTUi0wMDIiLCJpc19hZG1pbiI6ZmFsc2UsImlhdCI6MTc5MjIyNzI1NiwiZXhwIjoxNzkyMzEzNjU2fQ.Umu3UuK4ib4iTDlnLitEqV_bvX9BF5JIDW1CWIUI6ig
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

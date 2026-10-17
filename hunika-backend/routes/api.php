@@ -17,7 +17,7 @@ Route::get('/test', function () {
     ]);
 });
 
-// Fitur Kost & Filter
+// Fitur Kost
 Route::get('/kost', [KostController::class, 'index']);
 Route::get('/kost/{id}', [KostController::class, 'show']);
 Route::post('/kost', [KostController::class, 'store']);
@@ -28,9 +28,12 @@ Route::get('/kost/{id}/fasilitas', [KostController::class, 'facilities']);
 // Fitur Review
 Route::get('/kost/{kost_id}/reviews', [ReviewController::class, 'index']);
 
+// Fitur Pencarian Kost & Filter
 Route::get('/kost/search', [KostSearchController::class, 'search']);
 Route::get('/kost/filter', [KostSearchController::class, 'filter']);
 Route::get('/kost', [KostSearchController::class, 'indexArea']);
+
+// Untuk Register dan Login
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 

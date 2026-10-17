@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "email": "admin@hunika.com",
+        "email": "budi12@hunika.com",
         "password": "password123"
       }
   auth: inherit

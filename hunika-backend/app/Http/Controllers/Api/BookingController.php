@@ -2,140 +2,127 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller as BaseController;
-use App\Models\Booking;
-use App\Models\Kost;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon; // Bawaan Laravel untuk manipulasi tanggal
 
-class BookingController extends BaseController
+class BookingController extends Controller
 {
-    // 1. POST /api/bookings (Membuat booking baru)
-    public function store(Request $request)
-    {
-        $request->validate([
-            'kost_id'       => 'required|integer',
-            'check_in_date' => 'required|date',
-            'check_out_date'=> 'required|date|after:check_in_date',
-            'duration'      => 'required|integer|min:1',
-        ]);
-
-       $price = 1000000; 
-        $totalPrice = $price * $request->duration;
-
-        $booking = Booking::create([
-            'user_id' => $request->user()->id,
-            'kost_id'       => $request->kost_id,
-            'check_in_date' => $request->check_in_date,
-            'check_out_date'=> $request->check_out_date,
-            'duration'      => $request->duration,
-            'total_price'   => $totalPrice,
-            'status'        => 'pending',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Booking berhasil dibuat',
-            'data'    => $booking
-        ], 201);
-    }
-
-    // 2. GET /api/bookings (Mengambil daftar booking pengguna yang login)
+    // 1. Tampilkan riwayat pemesanan khusus milik user yang sedang login
     public function index(Request $request)
     {
-        $bookings = Booking::with('kost')
-            ->where('user_id', $request->user()->id)
-            ->get();
+        // Ambil user_id dengan aman dari Token JWT
+        $userId = $request->auth->sub;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil mengambil daftar booking',
-            'data'    => $bookings
-        ], 200);
+        // Gunakan JOIN untuk mengambil sekalian nama kost-nya
+        $bookings = DB::select('
+            SELECT b.*, k.name as kost_name, k.price as kost_price 
+            FROM bookings b 
+            JOIN kosts k ON b.kost_id = k.id 
+            WHERE b.user_id = ? 
+            ORDER BY b.created_at DESC
+        ', [$userId]);
+
+        return response()->json(['data' => $bookings], 200);
     }
 
-    // 3. GET /api/bookings/{id} (Melihat detail booking berdasarkan ID)
-    public function show(Request $request, $id)
+    // 2. Buat Pemesanan Baru
+    public function store(Request $request)
     {
-        $booking = Booking::with('kost')->find($id);
-
-        if (!$booking) {
-            return response()->json(['message' => 'Booking tidak ditemukan'], 404);
+        // Validasi Manual
+        if (!$request->has(['kost_id', 'check_in_date', 'duration'])) {
+            return response()->json(['message' => 'kost_id, check_in_date, dan duration (bulan) wajib diisi'], 400);
         }
 
-        if ($booking->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Akses ditolak'], 403);
+        $kostId = $request->input('kost_id');
+        $checkInDate = $request->input('check_in_date');
+        $duration = (int) $request->input('duration');
+
+        // Cek ketersediaan kost dan ambil harga dasarnya
+        $kost = DB::select('SELECT id, price FROM kosts WHERE id = ?', [$kostId]);
+        if (empty($kost)) {
+            return response()->json(['message' => 'Kost tidak ditemukan'], 404);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Detail booking ditemukan',
-            'data'    => $booking
-        ], 200);
-    }
+        $kostPrice = $kost[0]->price;
 
-    // 4. PUT /api/bookings/{id} (Mengubah data booking)
-    public function update(Request $request, $id)
-    {
-        $booking = Booking::find($id);
-
-        if (!$booking) {
-            return response()->json(['message' => 'Booking tidak ditemukan'], 404);
+        // KALKULASI OTOMATIS: Hitung total harga dan tanggal selesai
+        $totalPrice = $kostPrice * $duration;
+        try {
+            $checkOutDate = Carbon::parse($checkInDate)->addMonths($duration)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Format check_in_date salah (Gunakan format YYYY-MM-DD)'], 400);
         }
 
-        if ($booking->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Akses ditolak'], 403);
-        }
+        // Ambil user_id dari token JWT
+        $userId = $request->auth->sub;
 
-        if ($booking->status !== 'pending') {
-            return response()->json(['message' => 'Booking tidak dapat diubah karena status bukan pending'], 400);
-        }
-
-        $request->validate([
-            'check_in_date' => 'sometimes|date',
-            'check_out_date'=> 'sometimes|date|after:check_in_date',
-            'duration'      => 'sometimes|integer|min:1',
-        ]);
-
-        if ($request->has('check_in_date')) $booking->check_in_date = $request->check_in_date;
-        if ($request->has('check_out_date')) $booking->check_out_date = $request->check_out_date;
-        
-        if ($request->has('duration')) {
-            $booking->duration = $request->duration;
-            $kost = Kost::find($booking->kost_id);
-            if ($kost) {
-                $booking->total_price = $kost->price * $request->duration;
+        // Generate ID Booking Berurutan (Contoh: BKG-001)
+        $lastBooking = DB::select("SELECT id FROM bookings ORDER BY id DESC LIMIT 1");
+        if (empty($lastBooking)) {
+            $id = 'BKG-001';
+        } else {
+            $lastId = $lastBooking[0]->id;
+            preg_match('/(\d+)$/', $lastId, $matches);
+            if (isset($matches[1])) {
+                $lastNumber = (int) $matches[1];
+                $id = 'BKG-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+            } else {
+                $id = 'BKG-001';
             }
         }
 
-        $booking->save();
+        $now = now();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Data booking berhasil diperbarui',
-            'data'    => $booking
-        ], 200);
+        try {
+            // Simpan ke Database
+            DB::insert('INSERT INTO bookings (id, user_id, kost_id, check_in_date, check_out_date, duration, total_price, status, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $id,
+                $userId,
+                $kostId,
+                $checkInDate,
+                $checkOutDate,
+                $duration,
+                $totalPrice,
+                'pending', // Status awal pasti pending menunggu pembayaran
+                $now,
+                $now
+            ]);
+
+            return response()->json([
+                'message' => 'Pemesanan berhasil dibuat',
+                'booking_id' => $id,
+                'total_price' => $totalPrice
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal membuat pemesanan', 'error' => $e->getMessage()], 500);
+        }
     }
 
-    // 5. DELETE /api/bookings/{id} (Membatalkan booking)
-    public function destroy(Request $request, $id)
+    // 3. Lihat detail satu booking
+    public function show(Request $request, $id)
     {
-        $booking = Booking::find($id);
+        $booking = DB::select('
+            SELECT b.*, k.name as kost_name, k.address as kost_address 
+            FROM bookings b 
+            JOIN kosts k ON b.kost_id = k.id 
+            WHERE b.id = ?
+        ', [$id]);
 
-        if (!$booking) {
+        if (empty($booking)) {
             return response()->json(['message' => 'Booking tidak ditemukan'], 404);
         }
 
-        if ($booking->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Akses ditolak'], 403);
+        $bookingData = $booking[0];
+
+        // KEAMANAN: Hanya pemilik asli booking ATAU Admin yang boleh melihat detail ini
+        if ($bookingData->user_id !== $request->auth->sub && $request->auth->is_admin !== true) {
+            return response()->json(['message' => 'Akses ditolak. Ini bukan data pemesanan Anda.'], 403);
         }
 
-        // Mengubah status menjadi cancelled
-        $booking->status = 'cancelled';
-        $booking->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Booking berhasil dibatalkan'
-        ], 200);
+        return response()->json(['data' => $bookingData], 200);
     }
 }

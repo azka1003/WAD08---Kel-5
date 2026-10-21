@@ -14,6 +14,7 @@ import TambahKos from "./pages/Pemilik/TambahKos";
 import ReviewKos from "./pages/Review/ReviewKos";
 import BookingPage from "./pages/Booking_and_Transactions/BookingPage";
 import TransaksiPage from "./pages/Booking_and_Transactions/TransaksiPage";
+import HistoryPage from "./pages/Booking_and_Transactions/HistoryPage";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("isLogin"));
@@ -47,6 +48,7 @@ const App = () => {
             <Route path="/tambah-kost" element={<TambahKos />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/transaksi" element={<TransaksiPage />} />
+            <Route path="/history" element={<HistoryPage />} />
           </Routes>
         </div>
       </div>

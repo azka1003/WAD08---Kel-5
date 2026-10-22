@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { fmt } from "../data/dataKost";
 export default function KostCard({ kost }) {
   return (
     <Link
@@ -15,7 +16,7 @@ export default function KostCard({ kost }) {
         <h3 className="font-semibold text-lg">{kost.name}</h3>
         <p className="text-gray-500 text-sm mt-1">📍 {kost.loc}</p>
         <span className="block mt-2 font-bold text-green-600">
-          Rp {kost.price} / bulan
+          {fmt(Number(kost.price))} / bulan
         </span>
       </div>
     </Link>

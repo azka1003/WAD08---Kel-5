@@ -22,7 +22,7 @@ export const DATA = [
     name: "Kost Melati Residence",
     photo: img1,
     address: "Jl. Melati No. 12, Kebayoran Baru, Jakarta Selatan",
-    area: "Kebayoran Baru, Jafokarta Selatan",
+    area: "Kebayoran Baru, Jakarta Selatan",
     type: "Kost Putri",
     tier: "Premium",
     rating: "4.8",

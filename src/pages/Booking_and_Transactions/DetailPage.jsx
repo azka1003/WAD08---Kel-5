@@ -1,19 +1,92 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getKostById, fmt } from '../../data/dataKost'
-import Navbar from '../../components/Navbar'
+import { DATA, fmt } from '../../data/dataKost'
 import Breadcrumb from '../../components/Breadcrumb'
+
+const API_URL = 'http://127.0.0.1:8000/api/kost'
 
 export default function DetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const kost = getKostById(id)
+  const [kost, setKost] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('fasilitas')
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+
+    fetch(`${API_URL}/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Kost tidak ditemukan')
+        return res.json()
+      })
+      .then((result) => {
+        const d = result.data
+
+        // facilities dari API berupa string JSON
+        let facilities = d.facilities
+        if (typeof facilities === 'string') {
+          try { facilities = JSON.parse(facilities) } catch { facilities = [] }
+        }
+        if (!Array.isArray(facilities)) facilities = []
+
+        // data tambahan (tipe, tier, kamar, ulasan) dari file statis, dicocokkan lewat nama
+        const extra = DATA.find((k) => k.name === d.name) || {}
+
+        setKost({
+          ...extra,
+          id: d.id,
+          name: d.name,
+          address: d.address,
+          area: d.area,
+          rating: d.rating,
+          reviews: d.reviews,
+          price: Number(d.price),
+          rooms: d.rooms,
+          years: d.years,
+          photo: d.img,
+          stars: '★'.repeat(Math.round(Number(d.rating) || 0)),
+          description: d.description,
+          type: extra.type || 'Kost',
+          tier: extra.tier || 'Standar',
+          fasKamar: extra.fasKamar || [],
+          fasUmum: extra.fasUmum || facilities,
+          roomTypes: extra.roomTypes || [],
+          reviewList: extra.reviewList || [],
+        })
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Memuat data kost...</p>
+      </div>
+    )
+  }
+
+  if (error || !kost) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error || 'Kost tidak ditemukan'}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-green-600 text-white px-5 py-2 rounded-xl"
+          >
+            Kembali
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-gray-800">
-      <Navbar backTo="/" backLabel="Kembali ke Daftar Kost" />
-
       <div className="max-w-7xl mx-auto px-6 pb-16">
         <div className="pt-5 pb-2">
           <Breadcrumb items={[
@@ -73,8 +146,7 @@ export default function DetailPage() {
             {/* DESKRIPSI */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h2 className="text-lg font-bold text-gray-800 mb-3">Tentang Kost</h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-3">{kost.desc1}</p>
-              <p className="text-gray-600 text-sm leading-relaxed">{kost.desc2}</p>
+              <p className="text-gray-600 text-sm leading-relaxed">{kost.description}</p>
               <div className="flex items-center gap-6 mt-4 pt-4 border-t border-gray-100">
                 <div className="text-center"><p className="text-xl font-bold text-green-600">{kost.rooms}</p><p className="text-xs text-gray-400">Total Kamar</p></div>
                 <div className="text-center"><p className="text-xl font-bold text-green-600">{kost.years}+</p><p className="text-xs text-gray-400">Tahun Berdiri</p></div>

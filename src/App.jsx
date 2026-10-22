@@ -5,7 +5,7 @@ import Navbar from "./components/Navbar";
 import Login from './pages/login/login';
 import Profile from './pages/profile/profile'
 import SearchKost from './pages/search-kost/search-kost';
-import DetailKost from './pages/detail-kost/detail-kost';
+import DetailPage from "./pages/Booking_and_Transactions/DetailPage";
 import DashboardPemilik from './pages/Pemilik/DashboardPemilik';
 import TambahKos from './pages/Pemilik/TambahKos';
 import ReviewKos from './pages/Review/ReviewKos';
@@ -40,7 +40,7 @@ const handleLogout = () => {
           <Route path="/" element={<SearchKost isLoggedIn={isLoggedIn} />} />
 
           {/* Halaman Detail Kos (Menggunakan parameter ID unik kos) */}
-          <Route path="/kost/:id" element={<DetailKost />} />
+          <Route path="/detail/:id" element={<DetailPage />} />
 
           {/* Halaman Otentikasi & Akun */}
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />

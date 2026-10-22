@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
+import { fmt } from "../data/dataKost"
 export default function KostCard({ kost }) {
   return (
     <Link
-      to={`/kost/${kost.id}`}
+      to={`/detail/${kost.id}`} 
       className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition border border-slate-100 block"
     >
       <img
@@ -15,7 +16,7 @@ export default function KostCard({ kost }) {
         <h3 className="font-semibold text-lg">{kost.name}</h3>
         <p className="text-gray-500 text-sm mt-1">📍 {kost.loc}</p>
         <span className="block mt-2 font-bold text-green-600">
-          Rp {kost.price} / bulan
+          {fmt(Number(kost.price))} / bulan
         </span>
       </div>
     </Link>

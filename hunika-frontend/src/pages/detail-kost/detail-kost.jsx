@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useKostDetail } from "../../hooks/useKost";
 import { Link } from "react-router-dom";
@@ -11,14 +11,16 @@ export default function DetailKost() {
   const [comment, setComment] = useState("");
   const [reviews, setReviews] = useState([]);
 
+  const navigate =useNavigate();
+
   const handleBooking = () => {
   // 1. Cek status login dari localStorage
   const isLoggedIn = localStorage.getItem("isLogin");
 
   if (!isLoggedIn) {
     // 2. Jika belum login, beri peringatan & arahkan ke halaman login
-    alert("Silakan login terlebih dahulu untuk melakukan booking kos!");
-    navigate("/login");
+    alert("Silakan login terlebih dahulu!");
+  navigate("/login");
   } else {
     // 3. Jika sudah login, lanjut ke halaman booking
     navigate(`/booking/${kost.id}`); // atau rute booking milikmu

@@ -80,7 +80,7 @@ export default function DetailKost() {
             </div>
           </div>
 
-          {/* TIPE KAMAR */}
+          {/* TIPE KAMAR
           <div className="bg-white rounded-xl shadow mt-6 p-6 px-5">
             <h2 className="text-xl font-bold mb-4">Tipe Kamar</h2>
 
@@ -104,7 +104,7 @@ export default function DetailKost() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* ULASAN */}
           <div className="bg-white rounded-xl shadow mt-5 p-4">

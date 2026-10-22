@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { DATA, fmt } from '../../data/dataKost'
 import Breadcrumb from '../../components/Breadcrumb'
-
 const API_URL = 'http://127.0.0.1:8000/api/kost'
 
 export default function DetailPage() {
@@ -12,6 +11,18 @@ export default function DetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('fasilitas')
+
+
+  const handleBooking = () => {
+  const isLoggedIn = localStorage.getItem("isLogin");
+
+  if (!isLoggedIn) {
+    alert("Silakan login terlebih dahulu!");
+    navigate("/login"); 
+  } else {
+    navigate(`/booking/${kost.id}`);
+  }
+};
 
   useEffect(() => {
     setLoading(true)
@@ -101,8 +112,8 @@ export default function DetailPage() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">Tersedia</span>
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-600">{kost.type}</span>
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-purple-50 text-purple-600">{kost.tier}</span>
+              {/* <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-600">{kost.type}</span>
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-purple-50 text-purple-600">{kost.tier}</span> */}
             </div>
             <h1 className="text-3xl font-extrabold text-gray-900 mb-1">{kost.name}</h1>
             <p className="text-gray-500 text-sm flex items-center gap-1">
@@ -157,10 +168,10 @@ export default function DetailPage() {
             {/* TABS */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
               <div className="flex border-b border-gray-100">
-                {['fasilitas','kamar','ulasan'].map(tab => (
+                {['fasilitas','ulasan'].map(tab => (
                   <button key={tab} onClick={() => setActiveTab(tab)}
                     className={`flex-1 py-4 text-sm font-semibold capitalize transition ${activeTab === tab ? 'border-b-2 border-green-500 text-green-600' : 'text-gray-500 hover:text-gray-700'}`}>
-                    {tab === 'fasilitas' ? 'Fasilitas' : tab === 'kamar' ? 'Tipe Kamar' : 'Ulasan'}
+                    {tab === 'fasilitas' ? 'Fasilitas' : 'Ulasan'}
                   </button>
                 ))}
               </div>
@@ -195,7 +206,7 @@ export default function DetailPage() {
                     </div>
                   </div>
                 )}
-                {activeTab === 'kamar' && (
+                {/* {activeTab === 'kamar' && (
                   <div className="space-y-4">
                     {kost.roomTypes.map((r,i) => (
                       <div key={i} className="border border-gray-200 rounded-xl p-4 hover:border-green-400 transition">
@@ -218,7 +229,7 @@ export default function DetailPage() {
                       </div>
                     ))}
                   </div>
-                )}
+                )} */}
                 {activeTab === 'ulasan' && (
                   <div className="space-y-4">
                     {kost.reviewList.map((r,i) => (
@@ -249,7 +260,7 @@ export default function DetailPage() {
               </div>
               <p className="text-xs text-gray-400 mb-4">Mulai dari harga kamar Standar</p>
               <button
-                onClick={() => navigate(`/booking/${kost.id}`)}
+                onClick={handleBooking}
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm"
               >
                 Booking Sekarang
@@ -259,7 +270,7 @@ export default function DetailPage() {
               </button>
               <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-600"><span>Total Kamar</span><span className="font-semibold">{kost.rooms} kamar</span></div>
-                <div className="flex justify-between text-gray-600"><span>Tipe Kost</span><span className="font-semibold">{kost.type}</span></div>
+                {/* <div className="flex justify-between text-gray-600"><span>Tipe Kost</span><span className="font-semibold">{kost.type}</span></div> */}
                 <div className="flex justify-between text-gray-600"><span>Rating</span><span className="font-semibold text-yellow-500">★ {kost.rating}</span></div>
               </div>
             </div>

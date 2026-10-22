@@ -2,47 +2,179 @@ import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import useKost from "../../hooks/useKost";
 import KostCard from "../../components/KostCard";
-import FilterSidebar from "../../components/FilterSidebar";
 
+/* ============================================================
+   DATA FILTER
+   ============================================================ */
+const ROOM_TYPE_OPTIONS = ["Standar", "Deluxe", "Eksklusif", "All"];
+
+// key = id unik, label = teks di sidebar,
+// keywords = kata yang dicari di nama fasilitas dari API
+const FACILITY_OPTIONS = [
+  { key: "ac", label: "AC", keywords: ["ac"] },
+  { key: "kipas", label: "Kipas Angin", keywords: ["kipas"] },
+  { key: "wifi", label: "WiFi", keywords: ["wifi", "wi-fi"] },
+  { key: "km-dalam", label: "Kamar Mandi Dalam", keywords: ["kamar mandi dalam", "km dalam"] },
+  { key: "parkir", label: "Parkir", keywords: ["parkir"] },
+  { key: "laundry", label: "Laundry", keywords: ["laundry"] },
+  { key: "dapur", label: "Dapur Bersama", keywords: ["dapur"] },
+  { key: "keamanan", label: "Satpam / CCTV", keywords: ["satpam", "cctv"] },
+  { key: "kulkas", label: "Kulkas", keywords: ["kulkas"] },
+  { key: "tv", label: "Smart TV", keywords: ["smart tv"] },
+  { key: "gym", label: "Gym", keywords: ["gym"] },
+  { key: "rooftop", label: "Rooftop", keywords: ["rooftop"] },
+  { key: "coworking", label: "Co-working", keywords: ["co-working"] },
+  { key: "kolam", label: "Kolam Renang", keywords: ["kolam renang"] },
+];
+
+/* ============================================================
+   SIDEBAR FILTER (di file yang sama)
+   ============================================================ */
+function FilterPanel({
+  selectedRoomType,
+  setSelectedRoomType,
+  selectedFacilities,
+  setSelectedFacilities,
+  maxPrice,
+  setMaxPrice,
+}) {
+  return (
+    <aside className="w-64 self-start bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+      <h2 className="text-gray-400 font-bold uppercase text-sm mb-5">Filter</h2>
+
+      {/* TIPE KAMAR */}
+      <div className="mb-6">
+        <h3 className="font-semibold text-gray-800 mb-3">Tipe Kamar</h3>
+        <div className="space-y-2 text-gray-600">
+          {ROOM_TYPE_OPTIONS.map((item) => {
+            const value = item === "All" ? "" : item;
+            return (
+              <label key={item} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tipe"
+                  value={item}
+                  checked={selectedRoomType === value}
+                  onChange={(e) =>
+                    setSelectedRoomType(e.target.value === "All" ? "" : e.target.value)
+                  }
+                  className="text-green-600 focus:ring-green-500"
+                />{" "}
+                {item}
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* FASILITAS */}
+      <div className="mb-6">
+        <h3 className="font-semibold text-gray-800 mb-3">Fasilitas</h3>
+        <div className="space-y-2 text-gray-600">
+          {FACILITY_OPTIONS.map((opt) => (
+            <label key={opt.key} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedFacilities.includes(opt.key)}
+                onChange={() =>
+                  setSelectedFacilities(
+                    selectedFacilities.includes(opt.key)
+                      ? selectedFacilities.filter((k) => k !== opt.key)
+                      : [...selectedFacilities, opt.key]
+                  )
+                }
+                className="text-green-600 focus:ring-green-500"
+              />{" "}
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* HARGA MAKS */}
+      <div className="mb-6">
+        <h3 className="font-semibold text-gray-800 mb-3">Harga Maks (Rp)</h3>
+        <input
+          type="text"
+          placeholder="cth: 2000000"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value.replace(/\D/g, ""))}
+          className="w-full p-3 border rounded-lg"
+        />
+      </div>
+
+      {/* RESET */}
+      <button
+        onClick={() => {
+          setSelectedRoomType("");
+          setSelectedFacilities([]);
+          setMaxPrice("");
+        }}
+        className="w-full bg-gray-100 hover:bg-gray-200 py-3 rounded-full transition text-sm font-medium"
+      >
+        Reset Filter
+      </button>
+    </aside>
+  );
+}
+
+/* ============================================================
+   HALAMAN CARI KOST
+   ============================================================ */
 export default function SearchKost() {
-  const [selectedFacility, setSelectedFacility] = useState([]);
   const [selectedRoomType, setSelectedRoomType] = useState("");
   const [search, setSearch] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [showMenu, setShowMenu] = useState(false);
 
-  const [isLogin, setIsLogin] = useState(
-    localStorage.getItem("isLogin") === "true"
-  );
-
-  useEffect(() => {
-    const status = localStorage.getItem("isLogin");
-    setIsLogin(status === "true");
-  }, []);
-
-  // custom hook: fetch data kost dari "API" (kost-data.json)
   const { kostList, loading, error } = useKost();
 
   const filteredKost = kostList.filter((kost) => {
-    const facilityMatch =
-      selectedFacility.length === 0 ||
-      selectedFacility.every((facility) => kost.facilities.includes(facility));
+    const facilities = Array.isArray(kost.facilities) ? kost.facilities : [];
 
+    // tipe kamar
     const roomMatch =
-      selectedRoomType === "" || kost.roomType === selectedRoomType;
+      selectedRoomType === "" ||
+      (kost.roomType || "").toLowerCase() === selectedRoomType.toLowerCase();
+
+    // pencarian teks (nama, lokasi, fasilitas)
+    const searchText = search.trim().toLowerCase();
 
     const searchMatch =
-      kost.name.toLowerCase().includes(search.toLowerCase()) ||
-      kost.loc.toLowerCase().includes(search.toLowerCase()) ||
-      kost.facilities.some((facility) =>
-        facility.toLowerCase().includes(search.toLowerCase())
+      searchText === "" ||
+      (kost.name || "").toLowerCase().includes(searchText) ||
+      (kost.loc || "").toLowerCase().includes(searchText) ||
+      facilities.some((facility) =>
+        String(facility).toLowerCase().includes(searchText)
       );
 
-    const price = Number(kost.price.replace(/\./g, ""));
-    const inputPrice = Number(maxPrice.replace(/\./g, ""));
-    const priceMatch = maxPrice === "" || price <= inputPrice;
+    // harga maksimal
+    const price = Number(kost.price);
+    const inputPrice = Number(maxPrice);
 
-    return facilityMatch && roomMatch && searchMatch && priceMatch;
+    const priceMatch =
+      maxPrice === "" ||
+      (Number.isFinite(price) &&
+        Number.isFinite(inputPrice) &&
+        price <= inputPrice);
+
+    // fasilitas: semua yang dicentang harus dimiliki kost
+    const facilityMatch = selectedFacilities.every((key) => {
+      const option = FACILITY_OPTIONS.find((o) => o.key === key);
+      if (!option) return true;
+
+      return facilities.some((f) => {
+        const text = String(f).toLowerCase();
+        return option.keywords.some((k) =>
+          k.length <= 3
+            ? new RegExp(`\\b${k}\\b`).test(text) // kata pendek (ac): cocokkan kata utuh
+            : text.includes(k)
+        );
+      });
+    });
+
+    return roomMatch && searchMatch && priceMatch && facilityMatch;
   });
 
   return (
@@ -137,12 +269,12 @@ export default function SearchKost() {
 
       {/* MAIN */}
       <div className="flex gap-6 px-10 pb-10">
-        {/* FILTER — komponen terpisah, semua state/setter dikirim lewat props */}
-        <FilterSidebar
-          selectedFacility={selectedFacility}
-          setSelectedFacility={setSelectedFacility}
+        {/* FILTER */}
+        <FilterPanel
           selectedRoomType={selectedRoomType}
           setSelectedRoomType={setSelectedRoomType}
+          selectedFacilities={selectedFacilities}
+          setSelectedFacilities={setSelectedFacilities}
           maxPrice={maxPrice}
           setMaxPrice={setMaxPrice}
         />
@@ -152,11 +284,23 @@ export default function SearchKost() {
           {loading && <p className="text-gray-500">Memuat data kost...</p>}
           {error && <p className="text-red-500">Gagal memuat data: {error}</p>}
 
-          {!loading && !error && (
+          {!loading && !error && filteredKost.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredKost.map((kost) => (
                 <KostCard key={kost.id} kost={kost} />
               ))}
+            </div>
+          )}
+
+          {!loading && !error && filteredKost.length === 0 && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-md p-8 text-center text-gray-500">
+              <p className="font-semibold text-gray-700 mb-1">
+                Kost tidak ditemukan
+              </p>
+              <p>
+                Tidak ada kost yang sesuai dengan filter. Coba naikkan harga
+                maksimal, ubah tipe kamar, atau kurangi fasilitas yang dipilih.
+              </p>
             </div>
           )}
         </main>

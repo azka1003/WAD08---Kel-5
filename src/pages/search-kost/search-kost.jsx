@@ -12,12 +12,19 @@ const ROOM_TYPE_OPTIONS = ["Standar", "Deluxe", "Eksklusif", "All"];
 // keywords = kata yang dicari di nama fasilitas dari API
 const FACILITY_OPTIONS = [
   { key: "ac", label: "AC", keywords: ["ac"] },
+  { key: "kipas", label: "Kipas Angin", keywords: ["kipas"] },
   { key: "wifi", label: "WiFi", keywords: ["wifi", "wi-fi"] },
-  { key: "km-dalam", label: "Kamar Mandi Dalam", keywords: ["kamar mandi dalam"] },
+  { key: "km-dalam", label: "Kamar Mandi Dalam", keywords: ["kamar mandi dalam", "km dalam"] },
   { key: "parkir", label: "Parkir", keywords: ["parkir"] },
   { key: "laundry", label: "Laundry", keywords: ["laundry"] },
   { key: "dapur", label: "Dapur Bersama", keywords: ["dapur"] },
   { key: "keamanan", label: "Satpam / CCTV", keywords: ["satpam", "cctv"] },
+  { key: "kulkas", label: "Kulkas", keywords: ["kulkas"] },
+  { key: "tv", label: "Smart TV", keywords: ["smart tv"] },
+  { key: "gym", label: "Gym", keywords: ["gym"] },
+  { key: "rooftop", label: "Rooftop", keywords: ["rooftop"] },
+  { key: "coworking", label: "Co-working", keywords: ["co-working"] },
+  { key: "kolam", label: "Kolam Renang", keywords: ["kolam renang"] },
 ];
 
 /* ============================================================

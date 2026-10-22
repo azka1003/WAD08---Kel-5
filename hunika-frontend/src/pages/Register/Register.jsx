@@ -1,43 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import API from '../../services/api';
 
 export default function Register() {
   const navigate = useNavigate();
   
-  // State untuk menampung input form sesuai kolom database
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    role: 'pencari' // Default role sebagai pencari kos
-  });
+        name: '',
+        email: '',
+        password: '',
+        phone: '',
+        role: 'user' // default role
+    });
+    const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleRegister = (e) => {
-    e.preventDefault();
-    
-    // Simulasi penyimpanan sementara ke localStorage (nanti diganti koneksi API Back-End)
-    const existingUsers = JSON.parse(localStorage.getItem('hunika_users')) || [];
-    
-    // Membuat ID dummy menyerupai format database (misal: USR-003)
-    const newId = `USR-${String(existingUsers.length + 2).padStart(3, '0')}`;
-    
-    const newUser = {
-      id: newId,
-      ...formData,
-      created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    existingUsers.push(newUser);
-    localStorage.setItem('hunika_users', JSON.stringify(existingUsers));
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setError('');
 
-    alert('Registrasi berhasil! Silakan masuk menggunakan akun baru.');
-    navigate('/login');
-  };
+        try {
+            // Tembak endpoint register ke backend
+            const response = await API.post('/register', formData);
+            
+            alert('Registrasi Berhasil! Silakan login.');
+            navigate('/login');
+        } catch (err) {
+            console.error(err);
+            setError('Gagal registrasi, periksa kembali inputan Anda.');
+        }
+    };
 
   return (
     <div className="bg-slate-100 min-h-screen flex justify-center items-center p-6">

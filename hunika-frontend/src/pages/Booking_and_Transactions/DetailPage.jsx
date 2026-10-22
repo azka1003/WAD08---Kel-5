@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { DATA, fmt } from '../../data/dataKost'
 import Breadcrumb from '../../components/Breadcrumb'
-
 const API_URL = 'http://127.0.0.1:8000/api/kost'
 
 export default function DetailPage() {
@@ -12,6 +11,18 @@ export default function DetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('fasilitas')
+
+
+  const handleBooking = () => {
+  const isLoggedIn = localStorage.getItem("isLogin");
+
+  if (!isLoggedIn) {
+    alert("Silakan login terlebih dahulu!");
+    navigate("/login"); 
+  } else {
+    navigate(`/booking/${kost.id}`);
+  }
+};
 
   useEffect(() => {
     setLoading(true)
@@ -249,7 +260,7 @@ export default function DetailPage() {
               </div>
               <p className="text-xs text-gray-400 mb-4">Mulai dari harga kamar Standar</p>
               <button
-                onClick={() => navigate(`/booking/${kost.id}`)}
+                onClick={handleBooking}
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm"
               >
                 Booking Sekarang

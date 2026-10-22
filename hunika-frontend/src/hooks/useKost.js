@@ -1,4 +1,19 @@
 import { useState, useEffect } from "react";
+import { DATA } from "../data/dataKost"
+
+// facilities dari API berupa string JSON, ubah jadi array
+function parseFacilities(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
 
 export default function useKost() {
   const [kostList, setKostList] = useState([]);
@@ -20,22 +35,22 @@ export default function useKost() {
       })
       .then((result) => {
         if (isMounted) {
-          const data = result.data.map((kost) => ({
+          const data = result.data.map((kost) => {
+           // tipe kamar tidak ada di database, ambil dari data statis lewat nama
+          const extra = DATA.find((d) => d.name === kost.name);
+
+          return {
             ...kost,
-
-            // Menyesuaikan nama field database dengan frontend
             loc: kost.address,
-            roomType: kost.type,
+            roomType: extra?.roomTypes?.[0]?.name || "",
+            facilities: parseFacilities(kost.facilities),
+            // buang desimal ".00" supaya filter harga tidak salah
+            price: String(Math.round(Number(kost.price))),
+          };
+        });
 
-            // Data dari database
-            img: kost.img,
-            facilities: kost.facilities || [],
-
-            // Harga dibuat string agar filter lama tetap bekerja
-            price: String(kost.price),
-          }));
-
-          setKostList(data);
+          setKostList(
+            [...data].sort((a, b) => String(a.id).localeCompare(String(b.id))));
         }
       })
       .catch((err) => {

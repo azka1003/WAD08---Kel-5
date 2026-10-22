@@ -5,44 +5,41 @@ import KostCard from "../../components/KostCard";
 import FilterSidebar from "../../components/FilterSidebar";
 
 export default function SearchKost() {
-  const [selectedFacility, setSelectedFacility] = useState([]);
   const [selectedRoomType, setSelectedRoomType] = useState("");
   const [search, setSearch] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [showMenu, setShowMenu] = useState(false);
 
-  const [isLogin, setIsLogin] = useState(
-    localStorage.getItem("isLogin") === "true"
-  );
-
-  useEffect(() => {
-    const status = localStorage.getItem("isLogin");
-    setIsLogin(status === "true");
-  }, []);
-
-  // custom hook: fetch data kost dari "API" (kost-data.json)
   const { kostList, loading, error } = useKost();
 
   const filteredKost = kostList.filter((kost) => {
-    const facilityMatch =
-      selectedFacility.length === 0 ||
-      selectedFacility.every((facility) => kost.facilities.includes(facility));
+    // fasilitas tetap dipakai untuk kolom pencarian teks
+    const facilities = Array.isArray(kost.facilities) ? kost.facilities : [];
 
     const roomMatch =
-      selectedRoomType === "" || kost.roomType === selectedRoomType;
+      selectedRoomType === "" ||
+      (kost.roomType || "").toLowerCase() === selectedRoomType.toLowerCase();
+
+    const searchText = search.trim().toLowerCase();
 
     const searchMatch =
-      kost.name.toLowerCase().includes(search.toLowerCase()) ||
-      kost.loc.toLowerCase().includes(search.toLowerCase()) ||
-      kost.facilities.some((facility) =>
-        facility.toLowerCase().includes(search.toLowerCase())
+      searchText === "" ||
+      (kost.name || "").toLowerCase().includes(searchText) ||
+      (kost.loc || "").toLowerCase().includes(searchText) ||
+      facilities.some((facility) =>
+        String(facility).toLowerCase().includes(searchText)
       );
 
-    const price = Number(kost.price.replace(/\./g, ""));
-    const inputPrice = Number(maxPrice.replace(/\./g, ""));
-    const priceMatch = maxPrice === "" || price <= inputPrice;
+    const price = Number(kost.price);
+    const inputPrice = Number(maxPrice);
 
-    return facilityMatch && roomMatch && searchMatch && priceMatch;
+    const priceMatch =
+      maxPrice === "" ||
+      (Number.isFinite(price) &&
+        Number.isFinite(inputPrice) &&
+        price <= inputPrice);
+
+    return roomMatch && searchMatch && priceMatch;
   });
 
   return (
@@ -139,8 +136,6 @@ export default function SearchKost() {
       <div className="flex gap-6 px-10 pb-10">
         {/* FILTER — komponen terpisah, semua state/setter dikirim lewat props */}
         <FilterSidebar
-          selectedFacility={selectedFacility}
-          setSelectedFacility={setSelectedFacility}
           selectedRoomType={selectedRoomType}
           setSelectedRoomType={setSelectedRoomType}
           maxPrice={maxPrice}
@@ -152,11 +147,23 @@ export default function SearchKost() {
           {loading && <p className="text-gray-500">Memuat data kost...</p>}
           {error && <p className="text-red-500">Gagal memuat data: {error}</p>}
 
-          {!loading && !error && (
+          {!loading && !error && filteredKost.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredKost.map((kost) => (
                 <KostCard key={kost.id} kost={kost} />
               ))}
+            </div>
+          )}
+
+          {!loading && !error && filteredKost.length === 0 && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-md p-8 text-center text-gray-500">
+              <p className="font-semibold text-gray-700 mb-1">
+                Kost tidak ditemukan
+              </p>
+              <p>
+                Tidak ada kost yang sesuai dengan filter. Coba naikkan harga
+                maksimal atau ubah tipe kamar.
+              </p>
             </div>
           )}
         </main>

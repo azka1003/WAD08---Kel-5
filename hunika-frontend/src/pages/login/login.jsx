@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from "react-router-dom";
-
+import API from '../../services/api';
 
 export default function Login({ setIsLoggedIn }) {
   const [email, setEmail] = useState("");
@@ -9,8 +9,37 @@ export default function Login({ setIsLoggedIn }) {
   const redirectPath = location.state?.from || "/";   
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+            // Tembak endpoint login buatan backend tim kalian
+            const response = await API.post('/login', {
+                email: email,
+                password: password,
+            });
+
+            // Jika sukses, backend biasanya mengirim access_token
+            const token = response.data.access_token;
+            
+            // Simpan token ke localStorage browser
+            localStorage.setItem('token', token);
+
+            alert('Login Berhasil!');
+            navigate('/dashboard'); // Arahkan ke halaman utama/kost
+        } catch (err) {
+            console.error(err);
+            setError('Email atau password salah!');
+        }
+    
+
+    return (
+        // ... (struktur form login HTML/JSX kamu yang sudah ada)
+        <form onSubmit={handleLogin}>
+            {error && <p className="text-red-500">{error}</p>}
+            {/* input email & password */}
+        </form>
+    );
 
     // Logika Role Sesuai Database & Simulasi
     if (email === "user@gmail.com" && password === "123") {

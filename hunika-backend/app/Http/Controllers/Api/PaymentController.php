@@ -118,20 +118,30 @@ class PaymentController extends Controller
         $now = now();
 
         try {
-            // 1. Ubah status di tabel payments
-            DB::update('UPDATE payments SET status = ?, updated_at = ? WHERE id = ?', [$status, $now, $id]);
-            
-            // 2. Jika Admin menyetujui (success), ubah juga status di tabel bookings secara otomatis
-            if ($status === 'success') {
-                $payment = DB::select('SELECT booking_id FROM payments WHERE id = ?', [$id]);
-                if (!empty($payment)) {
-                    DB::update('UPDATE bookings SET status = ?, updated_at = ? WHERE id = ?', ['success', $now, $payment[0]->booking_id]);
-                }
-            }
+        // 1. BEGIN: Memulai mode transaksi SQL
+        DB::beginTransaction();
 
-            return response()->json(['message' => 'Status pembayaran berhasil diverifikasi menjadi ' . $status], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Gagal memverifikasi status', 'error' => $e->getMessage()], 500);
+        // 2. Kueri Pertama: Ubah status di tabel payments
+        DB::update('UPDATE payments SET status = ?, updated_at = ? WHERE id = ?', [$status, $now, $id]);
+        
+        // 3. Kueri Kedua: Jika status success, ubah juga status di tabel bookings
+        if ($status === 'success') {
+            $payment = DB::select('SELECT booking_id FROM payments WHERE id = ?', [$id]);
+            if (!empty($payment)) {
+                DB::update('UPDATE bookings SET status = ?, updated_at = ? WHERE id = ?', ['success', $now, $payment[0]->booking_id]);
+            }
         }
+
+        // 4. COMMIT: Jika semua kueri di atas berjalan lancar, simpan permanen ke Supabase
+        DB::commit();
+
+        return response()->json(['message' => 'Status pembayaran berhasil diverifikasi menjadi ' . $status], 200);
+
+    } catch (\Exception $e) {
+        // 5. ROLLBACK (END): Jika ada SATU saja kueri yang gagal, batalkan SEMUA perubahan sebelumnya!
+        DB::rollBack();
+
+        return response()->json(['message' => 'Gagal memverifikasi, transaksi dibatalkan', 'error' => $e->getMessage()], 500);
+    }
     }
 }

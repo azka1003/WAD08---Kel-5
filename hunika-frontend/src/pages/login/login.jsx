@@ -5,6 +5,7 @@ import API from '../../services/api';
 export default function Login({ setIsLoggedIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState('');
   const location = useLocation();
   const redirectPath = location.state?.from || "/";   
   const navigate = useNavigate();
@@ -19,27 +20,28 @@ export default function Login({ setIsLoggedIn }) {
                 password: password,
             });
 
+
             // Jika sukses, backend biasanya mengirim access_token
             const token = response.data.access_token;
             
             // Simpan token ke localStorage browser
             localStorage.setItem('token', token);
 
-            alert('Login Berhasil!');
-            navigate('/dashboard'); // Arahkan ke halaman utama/kost
+            if (setIsLoggedIn) {
+              setIsLoggedIn(true);
+          }
+
+          alert('Login Berhasil!');
+          
+          // Pindah ke halaman utama (home) atau dashboard
+          navigate(redirectPath);
         } catch (err) {
             console.error(err);
             setError('Email atau password salah!');
         }
     
 
-    return (
-        // ... (struktur form login HTML/JSX kamu yang sudah ada)
-        <form onSubmit={handleLogin}>
-            {error && <p className="text-red-500">{error}</p>}
-            {/* input email & password */}
-        </form>
-    );
+  
 
     // Logika Role Sesuai Database & Simulasi
     if (email === "user@gmail.com" && password === "123") {

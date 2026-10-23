@@ -22,7 +22,7 @@ export default function Login({ setIsLoggedIn }) {
 
 
             // Jika sukses, backend biasanya mengirim access_token
-            const token = response.data.access_token;
+            const token = response.data.token;
             
             // Simpan token ke localStorage browser
             localStorage.setItem('token', token);
@@ -34,7 +34,7 @@ export default function Login({ setIsLoggedIn }) {
           alert('Login Berhasil!');
           
           // Pindah ke halaman utama (home) atau dashboard
-          navigate(redirectPath);
+          navigate('/');
         } catch (err) {
             console.error(err);
             setError('Email atau password salah!');
@@ -44,19 +44,19 @@ export default function Login({ setIsLoggedIn }) {
   
 
     // Logika Role Sesuai Database & Simulasi
-    if (email === "user@gmail.com" && password === "123") {
-      localStorage.setItem("isLogin", "true");
-      localStorage.setItem("role", "pencari");
-      setIsLoggedIn(true);
-      navigate(redirectPath);
-    } else if (email === "owner@gmail.com" && password === "123") {
-      localStorage.setItem("isLogin", "true");
-      localStorage.setItem("role", "pemilik");
-      setIsLoggedIn(true);
-      navigate("/dashboard-pemilik");
-    } else {
-      alert("Email atau Password salah!");
-    }
+  //   if (email === "user@gmail.com" && password === "123") {
+  //     localStorage.setItem("isLogin", "true");
+  //     localStorage.setItem("role", "pencari");
+  //     setIsLoggedIn(true);
+  //     navigate(redirectPath);
+  //   } else if (email === "owner@gmail.com" && password === "123") {
+  //     localStorage.setItem("isLogin", "true");
+  //     localStorage.setItem("role", "pemilik");
+  //     setIsLoggedIn(true);
+  //     navigate("/dashboard-pemilik");
+  //   } else {
+  //     alert("Email atau Password salah!");
+  //   }
   };
 
   return (

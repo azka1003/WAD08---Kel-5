@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useKostDetail } from "../../hooks/useKost";
 import { Link } from "react-router-dom";
@@ -10,6 +10,23 @@ export default function DetailKost() {
   const [ratingInput, setRatingInput] = useState(0);
   const [comment, setComment] = useState("");
   const [reviews, setReviews] = useState([]);
+
+  const navigate =useNavigate();
+
+  const handleBooking = () => {
+  // 1. Cek status login dari localStorage
+  const isLoggedIn = localStorage.getItem("isLogin");
+
+  if (!isLoggedIn) {
+    // 2. Jika belum login, beri peringatan & arahkan ke halaman login
+    alert("Silakan login terlebih dahulu!");
+  navigate("/login");
+  } else {
+    // 3. Jika sudah login, lanjut ke halaman booking
+    navigate(`/booking/${kost.id}`); // atau rute booking milikmu
+  }
+};
+
 
   const { kost, loading, error } = useKostDetail(id);
 
@@ -80,7 +97,7 @@ export default function DetailKost() {
             </div>
           </div>
 
-          {/* TIPE KAMAR */}
+          {/* TIPE KAMAR
           <div className="bg-white rounded-xl shadow mt-6 p-6 px-5">
             <h2 className="text-xl font-bold mb-4">Tipe Kamar</h2>
 
@@ -95,7 +112,7 @@ export default function DetailKost() {
 
                 <div className="text-right">
                   <div className="font-bold text-green-600 px-4 py-3">
-                    Rp {Number(kost.price) .toLocaleString("id-ID")}
+                    Rp {kost.price}
                   </div>
 
                   <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded px-7">
@@ -104,7 +121,7 @@ export default function DetailKost() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* ULASAN */}
           <div className="bg-white rounded-xl shadow mt-5 p-4">
@@ -188,17 +205,16 @@ export default function DetailKost() {
             </div>
 
             <div className="text-3xl text-center font-bold text-emerald-600">
-              Rp {Number(kost.price) .toLocaleString("id-ID")}
-            </div>
+              Rp {Number(kost.price).toLocaleString("id-ID")}            </div>
 
             <p className="text-center text-gray-600 mb-4">per bulan</p>
 
-            <Link 
-              to={`/booking/${id}`} 
-              className="block w-full text-center bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition"
-            >
+            <button
+  onClick={handleBooking}
+  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm"
+>
   Booking Sekarang
-</Link>
+</button>
 
             <div className="mt-5 space-y-3 text-sm">
               <p>🏠 Pemilik: Bu Sari</p>

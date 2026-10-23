@@ -1,21 +1,52 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import API from '../../services/api';
 
 export default function Login({ setIsLoggedIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const location = useLocation();
+  const redirectPath = location.state?.from || "/";   
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+            // Tembak endpoint login buatan backend tim kalian
+            const response = await API.post('/login', {
+                email: email,
+                password: password,
+            });
+
+            // Jika sukses, backend biasanya mengirim access_token
+            const token = response.data.access_token;
+            
+            // Simpan token ke localStorage browser
+            localStorage.setItem('token', token);
+
+            alert('Login Berhasil!');
+            navigate('/dashboard'); // Arahkan ke halaman utama/kost
+        } catch (err) {
+            console.error(err);
+            setError('Email atau password salah!');
+        }
+    
+
+    return (
+        // ... (struktur form login HTML/JSX kamu yang sudah ada)
+        <form onSubmit={handleLogin}>
+            {error && <p className="text-red-500">{error}</p>}
+            {/* input email & password */}
+        </form>
+    );
 
     // Logika Role Sesuai Database & Simulasi
     if (email === "user@gmail.com" && password === "123") {
       localStorage.setItem("isLogin", "true");
       localStorage.setItem("role", "pencari");
       setIsLoggedIn(true);
-      navigate("/");
+      navigate(redirectPath);
     } else if (email === "owner@gmail.com" && password === "123") {
       localStorage.setItem("isLogin", "true");
       localStorage.setItem("role", "pemilik");
@@ -28,8 +59,16 @@ export default function Login({ setIsLoggedIn }) {
 
   return (
     <div className="bg-slate-100 min-h-screen flex justify-center items-center p-6">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-        
+            <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+
+        {/* Tombol Kembali */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-emerald-600 transition mb-4"
+        >
+          <span aria-hidden="true">←</span> Kembali
+        </Link>
+
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-emerald-600">HUNIKA</h1>
           <p className="text-gray-400 text-sm mt-1">Masuk ke akun Anda</p>

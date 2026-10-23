@@ -124,7 +124,7 @@ export default function BookingPage() {
 
           {/* PILIH KAMAR */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <h2 className="text-base font-bold text-gray-800 mb-4">Pilih Tipe Kamar</h2>
+            <h2 className="text-base font-bold text-gray-800 mb-4">Tipe Kamar</h2>
             <div className="space-y-3">
               {kost.roomTypes.map((r, i) => (
                 <div key={i}

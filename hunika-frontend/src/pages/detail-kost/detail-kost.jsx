@@ -205,8 +205,7 @@ export default function DetailKost() {
             </div>
 
             <div className="text-3xl text-center font-bold text-emerald-600">
-              Rp {kost.price}
-            </div>
+              Rp {Number(kost.price).toLocaleString("id-ID")}            </div>
 
             <p className="text-center text-gray-600 mb-4">per bulan</p>
 

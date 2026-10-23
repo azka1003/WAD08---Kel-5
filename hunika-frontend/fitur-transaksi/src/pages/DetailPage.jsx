@@ -172,7 +172,7 @@ export default function DetailPage() {
           <div className="space-y-4">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sticky top-20">
               <div className="flex items-end gap-1 mb-1">
-                <span className="text-2xl font-extrabold text-green-600">{fmt(kost.price)}</span>
+                <span className="text-2xl font-extrabold text-green-600">{fmt(Number(kost.price))}</span>
                 <span className="text-gray-400 text-sm mb-0.5">/bulan</span>
               </div>
               <p className="text-xs text-gray-400 mb-4">Mulai dari harga kamar Standar</p>

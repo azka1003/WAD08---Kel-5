@@ -47,7 +47,9 @@ const App = () => {
             <Route path="/dashboard-pemilik" element={<DashboardPemilik />} />
             <Route path="/tambah-kost" element={<TambahKos />} />
             <Route path="/booking" element={<BookingPage />} />
+            <Route path="/booking/:id" element={<BookingPage />} />
             <Route path="/transaksi" element={<TransaksiPage />} />
+            <Route path="/transaksi/:id" element={<TransaksiPage />} />
             <Route path="/history" element={<HistoryPage />} />
           </Routes>
         </div>

@@ -1,17 +1,67 @@
-import { useState } from 'react'
+
+import { useState, useContext, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getKostById, fmt } from '../data/dataKost'
-import Navbar from '../components/Navbar'
-import Breadcrumb from '../components/Breadcrumb'
+import { KostContext } from '../../context/KostContext'
+import { fmt } from '../../data/dataKost'
+import Navbar from '../../components/Navbar'
+import Breadcrumb from '../../components/Breadcrumb'
 
 export default function BookingPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const kost = getKostById(id)
-  const [selectedRoom, setSelectedRoom] = useState(kost.roomTypes[0])
+  const { kosts } = useContext(KostContext)
+
+  const kost = kosts.find(
+    (k) => String(k.id) === String(id)
+  )
+
+  const [selectedRoom, setSelectedRoom] = useState(null)
   const [checkin, setCheckin] = useState('')
   const [duration, setDuration] = useState(1)
-  const [form, setForm] = useState({ nama:'', email:'', phone:'', gender:'', birthdate:'', job:'', instansi:'', alamat:'', emergencyName:'', emergencyPhone:'' })
+  const [form, setForm] = useState({
+    nama: '',
+    email: '',
+    phone: '',
+    gender: '',
+    birthdate: '',
+    job: '',
+    instansi: '',
+    alamat: '',
+    emergencyName: '',
+    emergencyPhone: ''
+  })
+
+  useEffect(() => {
+    if (kost?.roomTypes?.length > 0) {
+      setSelectedRoom(kost.roomTypes[0])
+    } else {
+      setSelectedRoom(null)
+    }
+  }, [kost])
+
+  if (!kosts.length) {
+    return (
+      <div className="p-10 text-center">
+        Memuat data kost...
+      </div>
+    )
+  }
+
+  if (!kost) {
+    return (
+      <div className="p-10 text-center">
+        Data kost tidak ditemukan.
+      </div>
+    )
+  }
+
+  if (!selectedRoom) {
+    return (
+      <div className="p-10 text-center">
+        Tipe kamar belum tersedia untuk kost ini.
+      </div>
+    )
+  }
 
   const discounts = { 1:0, 3:0, 6:0.05, 12:0.10 }
   const discount  = discounts[duration] || 0

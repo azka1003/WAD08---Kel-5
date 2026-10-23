@@ -95,7 +95,7 @@ export default function DetailKost() {
 
                 <div className="text-right">
                   <div className="font-bold text-green-600 px-4 py-3">
-                    Rp {kost.price}
+                    Rp {Number(kost.price) .toLocaleString("id-ID")}
                   </div>
 
                   <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded px-7">
@@ -188,15 +188,15 @@ export default function DetailKost() {
             </div>
 
             <div className="text-3xl text-center font-bold text-emerald-600">
-              Rp {kost.price}
+              Rp {Number(kost.price) .toLocaleString("id-ID")}
             </div>
 
             <p className="text-center text-gray-600 mb-4">per bulan</p>
 
             <Link 
-  to={`/booking/${id}`} 
-  className="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition"
->
+              to={`/booking/${id}`} 
+              className="block w-full text-center bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition"
+            >
   Booking Sekarang
 </Link>
 

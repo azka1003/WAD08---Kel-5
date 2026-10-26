@@ -9,6 +9,31 @@ use Illuminate\Support\Str;
 
 class KostController extends Controller
 {
+  public function index(Request $request)
+    {
+        $perPage = 12;
+        $page = max(1, intval($request->input('page', 1)));
+        $offset = ($page - 1) * $perPage;
+
+        // Pastikan menghitung total data secara presisi
+        $totalResult = DB::select("SELECT COUNT(*) as total FROM kosts");
+        $total = isset($totalResult[0]) ? (int)$totalResult[0]->total : 0;
+
+        // Ambil data sesuai halaman
+        $kosts = DB::select("SELECT * FROM kosts ORDER BY created_at DESC LIMIT ? OFFSET ?", [$perPage, $offset]);
+
+        // Hitung total halaman secara akurat
+        $lastPage = $total > 0 ? ceil($total / $perPage) : 1;
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $kosts,
+            'current_page' => $page,
+            'last_page' => (int)$lastPage,
+            'total' => $total
+        ], 200);
+    }
+
     // 2. Tampilkan detail satu Kost
     public function show($id)
     {

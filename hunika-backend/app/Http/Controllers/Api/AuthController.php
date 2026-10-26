@@ -14,9 +14,9 @@ class AuthController extends Controller
     // Fungsi Register (Untuk User Biasa / Pencari Kost)
     public function register(Request $request)
     {
-        // 1. Validasi Input Manual (karena kita tidak pakai FormRequest)
-        if (!$request->has(['name', 'email', 'password'])) {
-            return response()->json(['message' => 'Nama, Email, dan Password wajib diisi'], 400);
+       // 1. Validasi Input Manual
+        if (!$request->has(['name', 'email', 'password', 'role'])) {
+            return response()->json(['message' => 'Nama, Email, Password, dan Role wajib diisi'], 400);
         }
 
         $email = $request->input('email');
@@ -27,25 +27,23 @@ class AuthController extends Controller
             return response()->json(['message' => 'Email sudah digunakan'], 409);
         }
 
-        // 3. Generate ID Manual Berurutan (Contoh: USR-001)
-        $lastUser = DB::select("SELECT id FROM users ORDER BY id DESC LIMIT 1");
-        
+        // 3. Cek Role & Generate ID Berdasarkan Role
+        $isAdmin = $request->input('role') === 'admin';
+        $prefix = $isAdmin ? 'ADM' : 'USR';
+
+        $lastUser = DB::select("SELECT id FROM users WHERE id LIKE ? ORDER BY id DESC LIMIT 1", ["{$prefix}%"]);
+
         if (empty($lastUser)) {
-            $id = 'USR-001';
+            $id = "{$prefix}-001";
         } else {
-            // Ambil ID terakhir, misal "USR-005" atau "ADM-001"
             $lastId = $lastUser[0]->id;
-            
-            // Ambil hanya karakter angka di ujungnya menggunakan ekspresi reguler
-            // Ini untuk mencegah error jika format huruf depannya beda (misal ada akun 'ADM-001')
-            preg_match('/(\d+)$/', $lastId, $matches);
-            
+            preg_match("/(\d+)\$/", $lastId, $matches);
+
             if (isset($matches[1])) {
                 $lastNumber = (int) $matches[1];
-                $id = 'USR-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+                $id = "{$prefix}-" . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
             } else {
-                // Fallback jika format ID terakhir tidak dikenali
-                $id = 'USR-001';
+                $id = "{$prefix}-001";
             }
         }
 
@@ -53,23 +51,25 @@ class AuthController extends Controller
         $now = now();
 
         try {
-            // 4. Simpan ke database (is_admin otomatis false dari bawaan migrasi)
-            DB::insert('INSERT INTO users (id, name, email, password, phone, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+            // 4. Simpan ke database
+            DB::insert('INSERT INTO users (id, name, email, password, phone, is_admin, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
                 $id,
                 $request->input('name'),
                 $email,
                 $hashedPassword,
-                $request->input('phone', null), // Opsional
+                $request->input('phone', null), 
+                $isAdmin ? 1 : 0, 
                 $now,
                 $now
             ]);
 
             return response()->json([
-                'message' => 'Registrasi berhasil',
+                'message' => 'Registrasi berhasil!',
                 'user' => [
                     'id' => $id,
                     'name' => $request->input('name'),
-                    'email' => $email
+                    'email' => $email,
+                    'is_admin' => $isAdmin
                 ]
             ], 201);
 

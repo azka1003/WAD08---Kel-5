@@ -14,10 +14,18 @@ export default function DashboardPemilik() {
 
   const fetchKosts = async () => {
     try {
-      const response = await API.get('/kosts');
-      setKosts(response.data);
+      const response = await API.get('/kost'); 
+      // Menyesuaikan dengan struktur JSON backend { status: 'success', data: [...] }
+      if (response.data && Array.isArray(response.data.data)) {
+        setKosts(response.data.data);
+      } else if (Array.isArray(response.data)) {
+        setKosts(response.data);
+      } else {
+        setKosts([]);
+      }
     } catch (err) {
       console.error('Gagal memuat data kost:', err);
+      setKosts([]);
     }
   };
 
@@ -29,7 +37,10 @@ export default function DashboardPemilik() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await API.put(`/kosts/${selectedKost.id}`, selectedKost);
+      const token = localStorage.getItem('token');
+      await API.put(`/kost/${selectedKost.id}`, selectedKost, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setIsModalOpen(false);
       alert('Data kost berhasil diubah!');
       fetchKosts();
@@ -42,11 +53,15 @@ export default function DashboardPemilik() {
   const handleDelete = async (id) => {
     if (window.confirm('Yakin ingin menghapus kost ini?')) {
       try {
-        await API.delete(`/kosts/${id}`);
+        const token = localStorage.getItem('token');
+        await API.delete(`/kost/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         alert('Kost berhasil dihapus!');
         fetchKosts();
       } catch (err) {
         console.error('Gagal menghapus kost:', err);
+        alert('Gagal menghapus data.');
       }
     }
   };
@@ -74,7 +89,7 @@ export default function DashboardPemilik() {
           <div className="col-span-2 text-center">Aksi</div>
         </div>
 
-        {kosts.length === 0 ? (
+        {(!kosts || kosts.length === 0) ? (
           <p className="text-center py-8 text-sm text-gray-400">Belum ada data kost.</p>
         ) : (
           kosts.map((kost) => (
@@ -87,7 +102,7 @@ export default function DashboardPemilik() {
                 Rp {Number(kost.price).toLocaleString('id-ID')}
               </div>
               <div className="col-span-2 text-sm text-gray-600">
-                {kost.rooms} Kamar
+                {kost.rooms || 2} Kamar
               </div>
               <div className="col-span-2 flex justify-center gap-2">
                 <button 
@@ -118,7 +133,7 @@ export default function DashboardPemilik() {
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Kost</label>
                 <input 
                   type="text" 
-                  value={selectedKost.name}
+                  value={selectedKost.name || ''}
                   onChange={(e) => setSelectedKost({...selectedKost, name: e.target.value})}
                   className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
                   required 
@@ -128,7 +143,7 @@ export default function DashboardPemilik() {
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Harga per Bulan</label>
                 <input 
                   type="number" 
-                  value={selectedKost.price}
+                  value={selectedKost.price || ''}
                   onChange={(e) => setSelectedKost({...selectedKost, price: e.target.value})}
                   className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
                   required 
@@ -138,7 +153,7 @@ export default function DashboardPemilik() {
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Alamat Lengkap</label>
                 <input 
                   type="text" 
-                  value={selectedKost.address}
+                  value={selectedKost.address || ''}
                   onChange={(e) => setSelectedKost({...selectedKost, address: e.target.value})}
                   className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
                   required 

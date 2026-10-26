@@ -53,24 +53,22 @@ export default function TambahKos() {
         data.append('img', imageFile);
       }
 
-      // Ambil token dari localStorage yang tersimpan saat login
-      const token = localStorage.getItem('token'); 
+      const token = localStorage.getItem('token');
 
       await API.post('/kost', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}` // Send Token JWT ke Backend
+          'Authorization': `Bearer ${token}`
         },
       });
 
-      alert('Kost dan gambar berhasil diunggah ke database!');
+      alert('Kost berhasil ditambahkan dan masuk database!');
       navigate('/dashboard-pemilik');
     } catch (err) {
       console.error('Gagal menyimpan kost:', err);
-      alert('Gagal menyimpan data, periksa kembali token login atau inputan Anda.');
+      alert('Gagal menyimpan data, periksa kembali inputan Anda.');
     }
   };
-
 
   return (
     <main className="max-w-3xl mx-auto px-6 py-10">
@@ -139,6 +137,33 @@ export default function TambahKos() {
                 value={formData.price} 
                 onChange={handleChange} 
                 placeholder="Contoh: 1500000" 
+                className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500" 
+                required 
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Jumlah Kamar</label>
+              <input 
+                type="number" 
+                name="rooms" 
+                value={formData.rooms} 
+                onChange={handleChange} 
+                placeholder="Contoh: 5" 
+                className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500" 
+                required 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tahun Dibangun/Renovasi</label>
+              <input 
+                type="number" 
+                name="years" 
+                value={formData.years} 
+                onChange={handleChange} 
+                placeholder="Contoh: 2024" 
                 className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500" 
                 required 
               />

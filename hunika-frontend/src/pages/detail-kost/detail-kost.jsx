@@ -14,18 +14,18 @@ export default function DetailKost() {
   const navigate =useNavigate();
 
   const handleBooking = () => {
-  // 1. Cek status login dari localStorage
-  const isLoggedIn = localStorage.getItem("isLogin");
+    // 1. Cek status login dari localStorage
+    const isLoggedIn = localStorage.getItem("isLogin");
 
-  if (!isLoggedIn) {
-    // 2. Jika belum login, beri peringatan & arahkan ke halaman login
-    alert("Silakan login terlebih dahulu!");
-  navigate("/login");
-  } else {
-    // 3. Jika sudah login, lanjut ke halaman booking
-    navigate(`/booking/${kost.id}`); // atau rute booking milikmu
-  }
-};
+    // 2. Pastikan variabel benar-benar ada dan isinya teks "true"
+    if (isLoggedIn !== "true") {
+      alert("Silakan login terlebih dahulu!");
+      navigate("/login");
+    } else {
+      // 3. Gunakan BACKTICK (`) dan pakai variabel 'id' dari baris 7
+      navigate(`/booking/${id}`);
+    }
+  };
 
 
   const { kost, loading, error } = useKostDetail(id);

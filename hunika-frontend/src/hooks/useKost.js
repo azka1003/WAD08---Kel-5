@@ -15,17 +15,20 @@ function parseFacilities(value) {
   return [];
 }
 
-export default function useKost() {
+export default function useKost(initialLimit = 4) {
   const [kostList, setKostList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [page, setPage] = useState(1);
+    const [meta, setMeta] = useState({ current_page: 1, total_pages: 1 });
 
   useEffect(() => {
     let isMounted = true;
 
     setLoading(true);
 
-    fetch("http://127.0.0.1:8000/api/kost")
+    fetch(`http://127.0.0.1:8000/api/kost?page=${page}&limit=${initialLimit}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Gagal mengambil data kost");
@@ -51,6 +54,7 @@ export default function useKost() {
 
           setKostList(
             [...data].sort((a, b) => String(a.id).localeCompare(String(b.id))));
+          setMeta(result.meta);
         }
       })
       .catch((err) => {
@@ -67,9 +71,9 @@ export default function useKost() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [page, initialLimit]);
 
-  return { kostList, loading, error };
+  return { kostList, loading, error, page, setPage, meta };
 }
 
 export function useKostDetail(id) {

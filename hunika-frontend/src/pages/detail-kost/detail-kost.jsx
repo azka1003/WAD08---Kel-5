@@ -26,6 +26,16 @@ export default function DetailKost() {
       navigate(`/booking/${kost.id}`); // atau rute booking milikmu
     }
   };
+    // 2. Pastikan variabel benar-benar ada dan isinya teks "true"
+    if (isLoggedIn !== "true") {
+      alert("Silakan login terlebih dahulu!");
+      navigate("/login");
+    } else {
+      // 3. Gunakan BACKTICK (`) dan pakai variabel 'id' dari baris 7
+      navigate(`/booking/${id}`);
+    }
+  };
+
 
   const { kost, loading, error } = useKostDetail(id);
 

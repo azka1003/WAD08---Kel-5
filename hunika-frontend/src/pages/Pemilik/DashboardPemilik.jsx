@@ -5,22 +5,32 @@ import API from '../../services/api';
 export default function DashboardPemilik() {
   const navigate = useNavigate();
   const [kosts, setKosts] = useState([]);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedKost, setSelectedKost] = useState(null);
 
   useEffect(() => {
-    fetchKosts();
-  }, []);
+    const pageNum = Number.isInteger(currentPage) && currentPage > 0 ? currentPage : 1;
+    fetchKosts(pageNum);
+  }, [currentPage]);
 
-  const fetchKosts = async () => {
+  const fetchKosts = async (page = 1) => {
     try {
-      const response = await API.get('/kost'); 
-      if (response.data && Array.isArray(response.data.data)) {
-        setKosts(response.data.data);
-      } else if (Array.isArray(response.data)) {
-        setKosts(response.data);
-      } else {
-        setKosts([]);
+      const response = await API.get(`/kost?page=${page}`); 
+      
+      // Menyesuaikan dengan struktur API: { data: [...], meta: { current_page, total_pages, ... } }
+      if (response.data) {
+        const listData = response.data.data || response.data;
+        setKosts(Array.isArray(listData) ? listData : []);
+
+        // Ambil halaman aktif dan total halaman dari objek meta backend
+        if (response.data.meta) {
+          setCurrentPage(Number(response.data.meta.current_page) || 1);
+          setLastPage(Number(response.data.meta.total_pages) || 1);
+        }
       }
     } catch (err) {
       console.error('Gagal memuat data kost:', err);
@@ -42,7 +52,7 @@ export default function DashboardPemilik() {
       });
       setIsModalOpen(false);
       alert('Data kost berhasil diubah!');
-      fetchKosts();
+      fetchKosts(currentPage);
     } catch (err) {
       console.error('Gagal memperbarui kost:', err);
       alert('Gagal mengupdate data.');
@@ -57,7 +67,7 @@ export default function DashboardPemilik() {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert('Kost berhasil dihapus!');
-        fetchKosts();
+        fetchKosts(currentPage);
       } catch (err) {
         console.error('Gagal menghapus kost:', err);
         alert('Gagal menghapus data.');
@@ -122,7 +132,38 @@ export default function DashboardPemilik() {
         )}
       </div>
 
-      {/* Modal Edit yang Disamakan dengan Form Tambah */}
+      {/* Navigasi Pagination Dinamis Berdasarkan Meta Backend */}
+      <div className="flex justify-between items-center mt-6 px-2">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage <= 1}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition select-none ${
+            currentPage <= 1 
+              ? 'bg-gray-100 text-gray-300 cursor-not-allowed pointer-events-none' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer'
+          }`}
+        >
+          Previously
+        </button>
+
+        <span className="text-xs font-bold text-gray-700">
+          Page {currentPage} of {lastPage || 1}
+        </span>
+
+        <button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, lastPage))}
+          disabled={currentPage >= lastPage}
+          className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition select-none ${
+            currentPage >= lastPage 
+              ? 'bg-emerald-300 cursor-not-allowed pointer-events-none' 
+              : 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer'
+          }`}
+        >
+          Furthermore
+        </button>
+      </div>
+
+      {/* Modal Edit */}
       {isModalOpen && selectedKost && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white w-full max-w-xl p-6 rounded-2xl shadow-xl my-8 max-h-[90vh] overflow-y-auto">

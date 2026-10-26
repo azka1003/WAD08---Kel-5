@@ -27,6 +27,8 @@ export default function Login({ setIsLoggedIn }) {
             // Simpan token ke localStorage browser
             localStorage.setItem('token', token);
 
+            localStorage.setItem("isLogin", "true");
+
             if (setIsLoggedIn) {
               setIsLoggedIn(true);
           }

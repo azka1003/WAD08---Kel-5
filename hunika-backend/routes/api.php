@@ -18,7 +18,6 @@ Route::get('/test', function () {
 });
 
 // Fitur Kost
-Route::get('/kost', [KostController::class, 'index']);
 Route::get('/kost/{id}', [KostController::class, 'show']);
 Route::post('/kost', [KostController::class, 'store']);
 Route::put('/kost/{id}', [KostController::class, 'update']);

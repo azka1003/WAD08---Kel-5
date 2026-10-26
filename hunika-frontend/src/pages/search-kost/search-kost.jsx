@@ -128,7 +128,7 @@ export default function SearchKost() {
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [showMenu, setShowMenu] = useState(false);
 
-  const { kostList, loading, error } = useKost();
+  const { kostList, loading, error, page, setPage, meta } = useKost(4);
 
   const filteredKost = kostList.filter((kost) => {
     const facilities = Array.isArray(kost.facilities) ? kost.facilities : [];
@@ -291,6 +291,39 @@ export default function SearchKost() {
               ))}
             </div>
           )}
+
+        {/* --- KONTROL PAGINASI --- */}
+        {!loading && !error && filteredKost.length > 0 && (
+            <div className="flex justify-center items-center gap-4 mt-8 mb-4 w-full">
+                <button
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                    className={`px-4 py-2 rounded-md font-semibold transition-colors ${
+                        page === 1
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-emerald-500 text-white hover:bg-emerald-600"
+                    }`}
+                >
+                    Sebelumnya
+                </button>
+
+                <span className="font-bold text-gray-700">
+                    Halaman {meta?.current_page || 1} dari {meta?.total_pages || 1}
+                </span>
+
+                <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === meta?.total_pages || !meta?.total_pages}
+                    className={`px-4 py-2 rounded-md font-semibold transition-colors ${
+                        page === meta?.total_pages || !meta?.total_pages
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-emerald-500 text-white hover:bg-emerald-600"
+                    }`}
+                >
+                    Selanjutnya
+                </button>
+            </div>
+        )}
 
           {!loading && !error && filteredKost.length === 0 && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-md p-8 text-center text-gray-500">

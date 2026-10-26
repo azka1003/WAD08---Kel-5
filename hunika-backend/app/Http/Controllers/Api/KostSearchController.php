@@ -83,30 +83,61 @@ class KostSearchController extends Controller
         ]);
     }
 
-    //  GET /api/kost?area={area}
-    // Mengambil kost berdasarkan area/lokasi spesifik
+    // GET /api/kost?area={area}&page={page}&limit={limit}
+    // Mengambil kost berdasarkan area spesifik sekaligus menerapkan paginasi
     public function indexArea(Request $request)
     {
-        $area = $request->input('area');
+        try {
+            // 1. Tangkap semua parameter yang mungkin dikirim frontend
+            $area = $request->input('area');
+            $page = (int) $request->input('page', 1);
+            $limit = (int) $request->input('limit', 12); // Default 12 jika tidak dikirim
+            $offset = ($page - 1) * $limit;
 
-        // Jika ada parameter area, jalankan filter area
-        if ($area) {
-            $query = "SELECT * FROM kosts WHERE area = ?";
-            $kosts = DB::select($query, [$area]);
+            // 2. Siapkan variabel untuk menampung hasil
+            $kosts = [];
+            $totalData = 0;
 
+            // 3. Logika: Apakah user memfilter area, atau ingin melihat semua data?
+            if ($area) {
+                // JIKA ADA FILTER AREA:
+                // Hitung total data di area tersebut saja
+                $totalQuery = DB::select("SELECT COUNT(*) as total FROM kosts WHERE area = ?", [$area]);
+                $totalData = $totalQuery[0]->total;
+
+                // Ambil datanya beserta LIMIT & OFFSET
+                $kosts = DB::select("SELECT * FROM kosts WHERE area = ? ORDER BY id ASC LIMIT ? OFFSET ?", [$area, $limit, $offset]);
+            } else {
+                // JIKA TIDAK ADA FILTER AREA (Tampilkan Semua):
+                // Hitung total seluruh data di database
+                $totalQuery = DB::select("SELECT COUNT(*) as total FROM kosts");
+                $totalData = $totalQuery[0]->total;
+
+                // Ambil datanya beserta LIMIT & OFFSET
+                $kosts = DB::select("SELECT * FROM kosts ORDER BY id ASC LIMIT ? OFFSET ?", [$limit, $offset]);
+            }
+
+            // 4. Hitung total halaman
+            $totalPages = ceil($totalData / $limit);
+
+            // 5. Kembalikan response lengkap dengan meta paginasinya
             return response()->json([
                 'status' => 'success',
-                'data' => $kosts
-            ]);
+                'data' => $kosts,
+                'meta' => [
+                    'current_page' => $page,
+                    'per_page' => $limit,
+                    'total_pages' => $totalPages,
+                    'total_data' => $totalData,
+                    'filtered_by_area' => $area ?: 'all' // Tambahan info kecil agar frontend tahu status filter
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        // Jika tidak ada parameter area (sebagai fallback untuk mengambil semua data kost di Fitur A)
-        $query = "SELECT * FROM kosts";
-        $kosts = DB::select($query);
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $kosts
-        ]);
     }
 }

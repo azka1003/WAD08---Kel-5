@@ -9,14 +9,6 @@ use Illuminate\Support\Str;
 
 class KostController extends Controller
 {
-    // 1. Tampilkan semua Kost
-    public function index()
-    {
-        // SELECT * otomatis akan mengambil kolom facilities juga
-        $kosts = DB::select('SELECT * FROM kosts ORDER BY id ASC');
-        return response()->json(['data' => $kosts], 200);
-    }
-
     // 2. Tampilkan detail satu Kost
     public function show($id)
     {

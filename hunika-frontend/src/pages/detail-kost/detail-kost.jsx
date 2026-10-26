@@ -11,12 +11,21 @@ export default function DetailKost() {
   const [comment, setComment] = useState("");
   const [reviews, setReviews] = useState([]);
 
-  const navigate =useNavigate();
+  const navigate = useNavigate();
 
   const handleBooking = () => {
     // 1. Cek status login dari localStorage
     const isLoggedIn = localStorage.getItem("isLogin");
 
+    if (!isLoggedIn) {
+      // 2. Jika belum login, beri peringatan & arahkan ke halaman login
+      alert("Silakan login terlebih dahulu!");
+      navigate("/login");
+    } else {
+      // 3. Jika sudah login, lanjut ke halaman booking
+      navigate(`/booking/${kost.id}`); // atau rute booking milikmu
+    }
+  };
     // 2. Pastikan variabel benar-benar ada dan isinya teks "true"
     if (isLoggedIn !== "true") {
       alert("Silakan login terlebih dahulu!");
@@ -200,21 +209,37 @@ export default function DetailKost() {
               <div className="text-center text-5xl font-bold text-emerald-600">
                 {kost.rating}
               </div>
-              <div className="text-center text-3xl text-yellow-500">★★★★★</div>
+
+              {/* BINTANG SESUAI RATING */}
+              <div className="text-center">
+                <div className="relative inline-block text-3xl leading-none">
+                  <div className="text-gray-300">★★★★★</div>
+                  <div
+                    className="absolute top-0 left-0 overflow-hidden whitespace-nowrap text-yellow-500"
+                    style={{
+                       width: `${(Math.floor(Number(kost.rating) * 2) / 2 / 5) * 100}%`,
+                      }}
+                  >
+                    ★★★★★
+                  </div>
+                </div>
+              </div>
+
               <p className="text-sm text-center text-gray-600">28 Ulasan</p>
             </div>
 
             <div className="text-3xl text-center font-bold text-emerald-600">
-              Rp {Number(kost.price).toLocaleString("id-ID")}            </div>
+              Rp {Number(kost.price).toLocaleString("id-ID")}
+            </div>
 
             <p className="text-center text-gray-600 mb-4">per bulan</p>
 
             <button
-  onClick={handleBooking}
-  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm"
->
-  Booking Sekarang
-</button>
+              onClick={handleBooking}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm"
+            >
+              Booking Sekarang
+            </button>
 
             <div className="mt-5 space-y-3 text-sm">
               <p>🏠 Pemilik: Bu Sari</p>

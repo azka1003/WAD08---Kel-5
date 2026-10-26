@@ -15,7 +15,6 @@ export default function DashboardPemilik() {
   const fetchKosts = async () => {
     try {
       const response = await API.get('/kost'); 
-      // Menyesuaikan dengan struktur JSON backend { status: 'success', data: [...] }
       if (response.data && Array.isArray(response.data.data)) {
         setKosts(response.data.data);
       } else if (Array.isArray(response.data)) {
@@ -123,10 +122,10 @@ export default function DashboardPemilik() {
         )}
       </div>
 
-      {/* Modal Edit */}
+      {/* Modal Edit yang Disamakan dengan Form Tambah */}
       {isModalOpen && selectedKost && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-lg p-6 rounded-2xl shadow-xl">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white w-full max-w-xl p-6 rounded-2xl shadow-xl my-8 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Edit Data Kost</h3>
             <form onSubmit={handleUpdate} className="space-y-4">
               <div>
@@ -139,16 +138,7 @@ export default function DashboardPemilik() {
                   required 
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Harga per Bulan</label>
-                <input 
-                  type="number" 
-                  value={selectedKost.price || ''}
-                  onChange={(e) => setSelectedKost({...selectedKost, price: e.target.value})}
-                  className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
-                  required 
-                />
-              </div>
+
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Alamat Lengkap</label>
                 <input 
@@ -159,6 +149,84 @@ export default function DashboardPemilik() {
                   required 
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Wilayah (Area)</label>
+                  <select 
+                    value={selectedKost.area || 'Jakarta Selatan'}
+                    onChange={(e) => setSelectedKost({...selectedKost, area: e.target.value})}
+                    className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500 bg-white"
+                  >
+                    <option value="Jakarta Selatan">Jakarta Selatan</option>
+                    <option value="Jakarta Barat">Jakarta Barat</option>
+                    <option value="Jakarta Timur">Jakarta Timur</option>
+                    <option value="Jakarta Pusat">Jakarta Pusat</option>
+                    <option value="Fatmawati">Fatmawati</option>
+                    <option value="Pondok Indah">Pondok Indah</option>
+                    <option value="Pesanggrahan">Pesanggrahan</option>
+                    <option value="Cipete">Cipete</option>
+                    <option value="Tebet">Tebet</option>
+                    <option value="Setiabudi">Setiabudi</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Harga per Bulan</label>
+                  <input 
+                    type="number" 
+                    value={selectedKost.price || ''}
+                    onChange={(e) => setSelectedKost({...selectedKost, price: e.target.value})}
+                    className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Jumlah Kamar</label>
+                  <input 
+                    type="number" 
+                    value={selectedKost.rooms || ''}
+                    onChange={(e) => setSelectedKost({...selectedKost, rooms: e.target.value})}
+                    className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                    required 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tahun Dibangun</label>
+                  <input 
+                    type="number" 
+                    value={selectedKost.years || ''}
+                    onChange={(e) => setSelectedKost({...selectedKost, years: e.target.value})}
+                    className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Fasilitas (Pisahkan dengan koma)</label>
+                <input 
+                  type="text" 
+                  value={selectedKost.facilities || ''}
+                  onChange={(e) => setSelectedKost({...selectedKost, facilities: e.target.value})}
+                  className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                  required 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Deskripsi Lengkap</label>
+                <textarea 
+                  rows="3"
+                  value={selectedKost.description || ''}
+                  onChange={(e) => setSelectedKost({...selectedKost, description: e.target.value})}
+                  className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                  required 
+                />
+              </div>
+
               <div className="flex justify-end gap-2 pt-2">
                 <button 
                   type="button" 

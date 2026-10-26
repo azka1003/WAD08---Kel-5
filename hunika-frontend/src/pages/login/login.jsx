@@ -36,8 +36,17 @@ export default function Login({ setIsLoggedIn }) {
           // Pindah ke halaman utama (home) atau dashboard
           navigate('/');
         } catch (err) {
-            console.error(err);
-            setError('Email atau password salah!');
+            console.error("Login Error", err);
+
+            const errorMessage = err.response?.data?.message || 'Email atau password salah';
+
+            alert(errorMessage);
+            
+            if (typeof setError === 'function'){
+              setError('Email atau password salah!');
+
+            }
+            
         }
     
 

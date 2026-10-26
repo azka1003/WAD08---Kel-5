@@ -105,7 +105,7 @@ export default function Register() {
               className="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:border-emerald-500 text-sm bg-white"
             >
               <option value="pencari">User</option>
-              <option value="pemilik">Admin</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
 

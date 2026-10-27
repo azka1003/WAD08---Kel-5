@@ -40,26 +40,57 @@ const ReviewKos = () => {
   }, [reviews]); 
 
   
-  const handleSubmitReview = (e) => {
-    e.preventDefault(); 
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
 
-    if (!inputName.trim() || !inputComment.trim() || selectedRating === 0) {
-      alert('Mohon isi nama, ulasan, dan berikan rating bintang terlebih dahulu!');
+    // 1. Validasi input dasar (Nama opsional jika backend otomatis mengambil dari token)
+    if (!inputComment.trim() || selectedRating === 0) {
+      alert('Mohon isi ulasan dan berikan rating bintang terlebih dahulu!');
       return;
     }
 
-    const newReview = {
-      id: Date.now(), 
-      name: inputName,
-      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-      rating: selectedRating,
-      comment: inputComment
-    };
+    // 2. Ambil token untuk Autentikasi
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Silakan login terlebih dahulu untuk memberikan ulasan!");
+      // Opsional: navigate('/login') jika Anda mengimpor useNavigate
+      return;
+    }
 
-    setReviews([newReview, ...reviews]);
-    setInputName('');
-    setInputComment('');
-    setSelectedRating(0);
+    try {
+      // 3. Kirim ke API Laravel
+      // PENTING: Pastikan Anda memiliki variabel 'kostId' atau 'id' di komponen ini.
+      // Jika komponen ini dipanggil dari detail-kost.jsx, pastikan melempar props kostId.
+      const response = await fetch(`http://127.0.0.1:8000/api/kost/${id}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          rating: selectedRating,
+          comment: inputComment,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Ulasan berhasil dikirim!");
+        // 4. Kosongkan form
+        setInputComment('');
+        setSelectedRating(0);
+        if (typeof setInputName === 'function') setInputName('');
+        
+        // Opsional: Panggil fungsi untuk me-refresh daftar ulasan dari backend di sini
+        // contoh: fetchReviews();
+      } else {
+        alert(data.message || "Gagal mengirim ulasan.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Terjadi kesalahan sistem saat mengirim ulasan.");
+    }
   };
 
   return (

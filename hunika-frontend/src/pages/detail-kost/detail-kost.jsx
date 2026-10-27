@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useKostDetail } from "../../hooks/useKost";
 
 export default function DetailKost() {
@@ -9,6 +9,25 @@ export default function DetailKost() {
   const [ratingInput, setRatingInput] = useState(0);
   const [comment, setComment] = useState("");
   const [reviews, setReviews] = useState([]);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/kost/${id}/reviews`);
+      const data = await response.json();
+      
+      if (response.ok && data.status) {
+        setReviews(data.data); 
+      }
+    } catch (error) {
+      console.error("Gagal memuat ulasan:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchReviews();
+    }
+  }, [id]);
 
   const navigate = useNavigate();
 
@@ -20,6 +39,57 @@ export default function DetailKost() {
       navigate("/login");
     } else {
       navigate(`/booking/${id}`);
+    }
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault(); // Mencegah halaman refresh
+
+    // 1. Ambil token dari localStorage
+    const token = localStorage.getItem("token");
+
+    // 2. Validasi login
+    if (!token) {
+      alert("Silakan login terlebih dahulu untuk memberikan ulasan!");
+      navigate("/login");
+      return;
+    }
+
+    // 3. Validasi rating tidak boleh 0
+    if (ratingInput < 1 || ratingInput > 5) {
+      alert("Silakan berikan rating 1 sampai 5 bintang.");
+      return;
+    }
+
+    try {
+      // 4. Kirim data ke endpoint Laravel dengan menyertakan Token JWT
+      const response = await fetch(`http://127.0.0.1:8000/api/kost/${id}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // WAJIB ADA karena middleware JWT
+        },
+        body: JSON.stringify({
+          rating: ratingInput,
+          comment: comment,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        alert("Ulasan berhasil dikirim!");
+        // Kosongkan form setelah berhasil
+        setRatingInput(0);
+        setComment("");
+        // Opsional: Anda bisa memanggil ulang useKostDetail di sini agar ulasan baru langsung muncul
+        fetchReviews();
+      } else {
+        alert(data.message || "Gagal mengirim ulasan.");
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Terjadi kesalahan sistem saat mengirim ulasan.");
     }
   };
 
@@ -156,18 +226,7 @@ export default function DetailKost() {
               />
 
               <button
-                onClick={() => {
-                  if (!name || !ratingInput || !comment) return;
-
-                  setReviews((prev) => [
-                    ...prev,
-                    { name: name, rating: ratingInput, comment },
-                  ]);
-
-                  setName("");
-                  setRatingInput(0);
-                  setComment("");
-                }}
+                onClick={handleSubmitReview}
                 className="mt-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
               >
                 Kirim Ulasan

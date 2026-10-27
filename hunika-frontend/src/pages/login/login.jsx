@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import API from '../../services/api';
 
 export default function Login({ setIsLoggedIn }) {
@@ -12,43 +12,46 @@ export default function Login({ setIsLoggedIn }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-            // Tembak endpoint login buatan backend tim kalian
-            const response = await API.post('/login', {
-                email: email,
-                password: password,
-            });
+      // Tembak endpoint login ke backend Laravel
+      const response = await API.post('/login', {
+        email: email,
+        password: password,
+      });
 
+      // 1. Ambil token, data user, dan status admin dari respons backend
+      const token = response.data.token;
+      const user = response.data.user; // Berisi data user termasuk is_admin
+      const isAdmin = user && (user.is_admin === true || user.is_admin === 1);
 
-            // Jika sukses, backend biasanya mengirim access_token
-            const token = response.data.token;
-            
-            // Simpan token ke localStorage browser
-            localStorage.setItem('token', token);
+      // 2. Simpan ke localStorage browser
+      localStorage.setItem('token', token);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('role', isAdmin ? 'admin' : 'pencari'); // atau 'user'
 
-            if (setIsLoggedIn) {
-              setIsLoggedIn(true);
-          }
+      // 3. Update state global jika props-nya dikirim dari App.jsx
+      if (typeof setIsLoggedIn === 'function') {
+        setIsLoggedIn(true);
+      }
 
-          alert('Login Berhasil!');
-          
-          // Pindah ke halaman utama (home) atau dashboard
-          navigate('/');
-        } catch (err) {
-            console.error("Login Error", err);
+      alert('Login Berhasil!');
 
-            const errorMessage = err.response?.data?.message || 'Email atau password salah';
+      // 4. Redirect cerdas: Jika admin ke dashboard pemilik, jika user biasa ke home/pencarian
+      if (isAdmin) {
+        navigate('/dashboard-pemilik');
+      } else {
+        navigate('/');
+      }
 
-            alert(errorMessage);
-            
-            if (typeof setError === 'function'){
-              setError('Email atau password salah!');
+    } catch (err) {
+      console.error('Login Error', err);
+      const errorMessage = err.response?.data?.message || 'Email atau password salah';
+      alert(errorMessage);
+      if (typeof setError === 'function') {
+        setError(errorMessage);
+      }
+    }
 
-            }
-            
-        }
-    
 
   
 

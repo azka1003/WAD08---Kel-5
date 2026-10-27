@@ -14,6 +14,7 @@ export default function Profile() {
     localStorage.removeItem("isLogin");
     localStorage.removeItem("email");
     localStorage.removeItem("role");
+    localStorage.removeItem("token");
 
     navigate("/");
     window.location.reload(); // supaya navbar ikut berubah jadi "Masuk"

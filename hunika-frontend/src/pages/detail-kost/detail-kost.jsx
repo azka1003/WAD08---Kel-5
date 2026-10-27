@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useKostDetail } from "../../hooks/useKost";
-import { Link } from "react-router-dom";
 
 export default function DetailKost() {
   const { id } = useParams();
@@ -12,27 +11,17 @@ export default function DetailKost() {
   const [reviews, setReviews] = useState([]);
 
   const navigate = useNavigate();
+
   const handleBooking = () => {
-  const isLoggedIn = localStorage.getItem("isLogin");
+    const isLoggedIn = localStorage.getItem("isLogin");
 
-  if (isLoggedIn !== "true") {
-    alert("Silakan login terlebih dahulu!");
-    navigate("/login");
-  } else {
-    navigate(`/booking/${id}`);
-  }
-};
-
-      // 2. Pastikan variabel benar-benar ada dan isinya teks "true"
     if (isLoggedIn !== "true") {
       alert("Silakan login terlebih dahulu!");
       navigate("/login");
     } else {
-      // 3. Gunakan BACKTICK (`) dan pakai variabel 'id' dari baris 7
       navigate(`/booking/${id}`);
     }
   };
-
 
   const { kost, loading, error } = useKostDetail(id);
 
@@ -149,7 +138,9 @@ export default function DetailKost() {
                   <span
                     key={star}
                     onClick={() => setRatingInput(star)}
-                    className={star <= ratingInput ? "text-yellow-500" : "text-gray-300"}
+                    className={
+                      star <= ratingInput ? "text-yellow-500" : "text-gray-300"
+                    }
                   >
                     ★
                   </span>
@@ -214,8 +205,10 @@ export default function DetailKost() {
                   <div
                     className="absolute top-0 left-0 overflow-hidden whitespace-nowrap text-yellow-500"
                     style={{
-                       width: `${(Math.floor(Number(kost.rating) * 2) / 2 / 5) * 100}%`,
-                      }}
+                      width: `${
+                        (Math.floor(Number(kost.rating) * 2) / 2 / 5) * 100
+                      }%`,
+                    }}
                   >
                     ★★★★★
                   </div>
@@ -248,3 +241,4 @@ export default function DetailKost() {
       </div>
     </div>
   );
+}

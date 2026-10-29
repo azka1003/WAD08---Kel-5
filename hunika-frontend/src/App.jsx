@@ -17,7 +17,9 @@ import TransaksiPage from "./pages/Booking_and_Transactions/TransaksiPage";
 import HistoryPage from "./pages/Booking_and_Transactions/HistoryPage";
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("isLogin"));
+  const [isLoggedIn, setIsLoggedIn] = useState(
+  localStorage.getItem("isLogin") === "true" && !!localStorage.getItem("token")
+);
   const [role, setRole] = useState(localStorage.getItem("role") || "");
 
   const handleLogout = () => {

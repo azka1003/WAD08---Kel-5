@@ -4,6 +4,7 @@ import { KostContext } from '../../context/KostContext';
 import { fmt } from '../../data/dataKost';
 import Navbar from '../../components/Navbar';
 import Breadcrumb from '../../components/Breadcrumb';
+import API from '../../services/api';
 
 const BANKS = [
   { id:'bca',  name:'BCA',      norek:'1234567890', an:'PT Hunika Digital' },
@@ -16,7 +17,7 @@ export default function TransaksiPage() {
   const { id } = useParams();
   const { kosts } = useContext(KostContext);
   console.log("Data kosts dari context:", kosts);
-  const kost = kosts.find((k) => Number(k.id) === Number(id));
+  const kost = kosts.find((k) => String(k.id) === String(id));
   
   const [booking, setBooking] = useState(null);
   const [method, setMethod]   = useState('transfer');
@@ -24,6 +25,8 @@ export default function TransaksiPage() {
   const [copied, setCopied]   = useState(false);
   const [file, setFile]       = useState(null);
   const [success, setSuccess] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentId, setPaymentId] = useState(null);
   const [invoiceNo] = useState(() => 'HNK-' + Date.now().toString().slice(-8));
 
   useEffect(() => {
@@ -35,14 +38,57 @@ export default function TransaksiPage() {
 
   const selectedBank = BANKS.find(b => b.id === bank);
 
-  const handleConfirm = () => {
-    if (method === 'transfer' && !file) {
-      alert('Mohon upload bukti transfer terlebih dahulu.');
-      return;
+  const handleConfirm = async () => {
+  if (!booking?.bookingId) {
+    alert('Data booking tidak ditemukan. Silakan ulangi booking.');
+    return;
+  }
+
+  if (method === 'transfer' && !file) {
+    alert('Mohon upload bukti transfer terlebih dahulu.');
+    return;
+  }
+
+  setPaymentLoading(true);
+
+  try {
+    // 1. Buat tagihan di backend
+    const response = await API.post('/payments', {
+      booking_id: booking.bookingId,
+      method: method,
+    });
+
+    console.log('Respons pembayaran:', response.data);
+
+    // 2. Simpan ID pembayaran dari backend
+    const newPaymentId = response.data.payment_id;
+    setPaymentId(newPaymentId);
+
+    // 3. Beri tahu bahwa tagihan berhasil dibuat
+    alert(
+      `Tagihan berhasil dibuat!\nID Pembayaran: ${newPaymentId}\nNominal: ${response.data.amount}`
+    );
+
+    // Jangan tandai pembayaran sukses dulu.
+    // Backend masih menunggu verifikasi pembayaran.
+  } catch (err) {
+    console.error(
+      'Error pembayaran:',
+      err.response?.data || err.message
+    );
+
+    if (err.response?.status === 401) {
+      alert('Sesi login habis. Silakan login kembali.');
+    } else {
+      alert(
+        err.response?.data?.message ||
+        'Gagal membuat tagihan. Silakan coba lagi.'
+      );
     }
-    setSuccess(true);
-    localStorage.removeItem('bookingData');
-  };
+  } finally {
+    setPaymentLoading(false);
+  }
+};
 
   const copyNorek = (text) => {
   navigator.clipboard.writeText(text).then(() => {
@@ -183,9 +229,17 @@ export default function TransaksiPage() {
               </div>
             )}
   
-            <button onClick={handleConfirm} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition text-base">
-              Konfirmasi Pembayaran
-            </button>
+           <button
+  onClick={handleConfirm}
+  disabled={paymentLoading || !!paymentId}
+  className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-4 rounded-xl transition text-base"
+>
+  {paymentLoading
+    ? 'Memproses pembayaran...'
+    : paymentId
+      ? 'Tagihan Berhasil Dibuat'
+      : 'Buat Tagihan Pembayaran'}
+</button>
           </div>
   
           {/* INVOICE SIDEBAR */}

@@ -4,6 +4,7 @@ import { KostContext } from '../../context/KostContext';
 import { fmt } from '../../data/dataKost';
 import Navbar from '../../components/Navbar';
 import Breadcrumb from '../../components/Breadcrumb';
+import API from '../../services/api';
 
 export default function BookingPage() {
   const { id } = useParams();
@@ -11,30 +12,26 @@ export default function BookingPage() {
   const { kosts } = useContext(KostContext);
   console.log("Data kosts dari context:", kosts);
 
-
   const kost = kosts.find((k) => String(k.id) === String(id));
-  
 
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [checkin, setCheckin] = useState('');
   const [duration, setDuration] = useState(1);
-  const [form, setForm] = useState({ 
-    nama: '', email: '', phone: '', gender: '', 
-    birthdate: '', job: '', instansi: '', 
-    alamat: '', emergencyName: '', emergencyPhone: '' 
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    nama: '', email: '', phone: '', gender: '',
+    birthdate: '', job: '', instansi: '',
+    alamat: '', emergencyName: '', emergencyPhone: ''
   });
-
 
   if (!kost) {
     return <div className="p-10 text-center">Memuat data...</div>;
   }
 
-
   if (!selectedRoom && kost.roomTypes?.length > 0) {
     setSelectedRoom(kost.roomTypes[0]);
   }
 
- 
   const discounts = { 1: 0, 3: 0, 6: 0.05, 12: 0.10 };
   const discount = discounts[duration] || 0;
   const subtotal = selectedRoom ? selectedRoom.price * duration : 0;
@@ -48,32 +45,65 @@ export default function BookingPage() {
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  const handleSubmit = () => {
-  // Tambahkan pengecekan ini:
-  if (!selectedRoom) {
-    alert('Mohon pilih tipe kamar terlebih dahulu.');
-    return;
-  }
-  
-  if (!checkin || !form.nama || !form.email || !form.phone) {
-    alert('Mohon lengkapi data wajib terlebih dahulu.');
-    return;
-  }
-  
-  
-  const booking = { 
-    kostId: kost.id, 
-    roomName: selectedRoom.name, 
-    roomPrice: selectedRoom.price, 
-    checkin, 
-    duration, 
-    total, 
-    ...form 
+  const handleSubmit = async () => {
+    if (!selectedRoom) {
+      alert('Mohon pilih tipe kamar terlebih dahulu.');
+      return;
+    }
+
+    if (!checkin || !form.nama || !form.email || !form.phone) {
+      alert('Mohon lengkapi data wajib terlebih dahulu.');
+      return;
+    }
+
+    // Booking butuh login (token JWT)
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Silakan login terlebih dahulu untuk melakukan booking.');
+      navigate('/login');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Backend menghitung check_out_date & total_price sendiri
+      const res = await API.post('/bookings', {
+        kost_id: kost.id,
+        check_in_date: checkin,
+        duration: Number(duration),
+      });
+
+      console.log('Respons booking:', res.data);
+
+      const booking = {
+        bookingId: res.data.booking_id,
+        totalServer: res.data.total_price,
+        kostId: kost.id,
+        roomName: selectedRoom.name,
+        roomPrice: selectedRoom.price,
+        checkin,
+        duration,
+        total,
+        ...form
+      };
+
+      localStorage.setItem('bookingData', JSON.stringify(booking));
+      navigate(`/transaksi/${kost.id}`);
+    } catch (err) {
+      console.log('Error booking:', err.response?.data || err.message);
+
+      if (err.response?.status === 401) {
+        alert('Sesi login habis. Silakan login kembali.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('isLogin');
+        navigate('/login');
+      } else {
+        alert(err.response?.data?.message || 'Gagal membuat pemesanan. Coba lagi.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
-  
-  localStorage.setItem('bookingData', JSON.stringify(booking));
-  navigate(`/transaksi/${kost.id}`);
-};
 
   return (
     <div className="min-h-screen bg-slate-50 text-gray-800">
@@ -104,6 +134,7 @@ export default function BookingPage() {
 
       <div className="max-w-6xl mx-auto px-6 pb-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
+
           {/* RINGKASAN KOST */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <h2 className="text-base font-bold text-gray-800 mb-4">Kost yang Dipilih</h2>
@@ -126,7 +157,7 @@ export default function BookingPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <h2 className="text-base font-bold text-gray-800 mb-4">Tipe Kamar</h2>
             <div className="space-y-3">
-              {kost.roomTypes.map((r, i) => (
+              {(kost.roomTypes || []).map((r, i) => (
                 <div key={i}
                   onClick={() => setSelectedRoom(r)}
                   className={`border-2 rounded-xl p-4 cursor-pointer transition ${selectedRoom?.name === r.name ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'}`}>
@@ -134,7 +165,7 @@ export default function BookingPage() {
                     <div>
                       <h4 className="font-bold text-gray-800">{r.name} <span className="text-xs text-gray-500 font-normal">({r.size} · {r.bed})</span></h4>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {r.extras.map((e, j) => <span key={j} className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{e}</span>)}
+                        {(r.extras || []).map((e, j) => <span key={j} className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{e}</span>)}
                       </div>
                     </div>
                     <div className="text-right">
@@ -147,97 +178,101 @@ export default function BookingPage() {
             </div>
           </div>
 
-          {/* JADWAL & DATA PENYEWA (Sisanya sama seperti kode kamu) */}
+          {/* JADWAL SEWA */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                      <h2 className="text-base font-bold text-gray-800 mb-4">Jadwal Sewa</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Masuk <span className="text-red-500">*</span></label>
-                          <input type="date" value={checkin} onChange={e => setCheckin(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500"/>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1.5">Durasi Sewa <span className="text-red-500">*</span></label>
-                          <select value={duration} onChange={e => setDuration(Number(e.target.value))} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-green-500">
-                            <option value={1}>1 Bulan</option>
-                            <option value={3}>3 Bulan</option>
-                            <option value={6}>6 Bulan (hemat 5%)</option>
-                            <option value={12}>12 Bulan (hemat 10%)</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="mt-4 bg-green-50 border border-green-100 rounded-xl px-4 py-3 flex justify-between">
-                        <span className="text-sm text-gray-600 font-medium">Perkiraan Tanggal Keluar</span>
-                        <span className="text-sm font-bold text-green-700">{checkoutDate()}</span>
-                      </div>
-                    </div>
-          
-                    {/* DATA PENYEWA */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                      <h2 className="text-base font-bold text-gray-800 mb-4">Data Penyewa</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-bold text-gray-700 mb-1.5">Nama Lengkap <span className="text-red-500">*</span></label>
-                          <input type="text" placeholder="Masukkan nama lengkap sesuai KTP" value={form.nama} onChange={e => setForm({...form, nama:e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500"/>
-                        </div>
-                        {[['email','Email','email','contoh@email.com'],['phone','Nomor HP / WhatsApp','tel','08xx-xxxx-xxxx'],['instansi','Instansi / Kampus / Perusahaan','text','Nama tempat bekerja atau kuliah']].map(([key,label,type,ph]) => (
-                          <div key={key}>
-                            <label className="block text-sm font-bold text-gray-700 mb-1.5">{label} {key !== 'instansi' && <span className="text-red-500">*</span>}</label>
-                            <input type={type} placeholder={ph} value={form[key]} onChange={e => setForm({...form,[key]:e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500"/>
-                          </div>
-                        ))}
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1.5">Jenis Kelamin <span className="text-red-500">*</span></label>
-                          <select value={form.gender} onChange={e => setForm({...form,gender:e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-green-500">
-                            <option value="">Pilih jenis kelamin</option>
-                            <option>Laki-laki</option><option>Perempuan</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Lahir <span className="text-red-500">*</span></label>
-                          <input type="date" value={form.birthdate} onChange={e => setForm({...form,birthdate:e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500"/>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1.5">Pekerjaan <span className="text-red-500">*</span></label>
-                          <select value={form.job} onChange={e => setForm({...form,job:e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-green-500">
-                            <option value="">Pilih pekerjaan</option>
-                            <option>Mahasiswa</option><option>Karyawan Swasta</option><option>PNS / ASN</option><option>Wiraswasta</option><option>Profesional Freelance</option><option>Lainnya</option>
-                          </select>
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-bold text-gray-700 mb-1.5">Alamat Asal <span className="text-red-500">*</span></label>
-                          <textarea rows={3} placeholder="Jl. Nama Jalan No. XX, Kecamatan, Kota, Provinsi" value={form.alamat} onChange={e => setForm({...form,alamat:e.target.value})} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500 resize-none"/>
-                        </div>
-                      </div>
-                    </div>
-          
-                    <button onClick={handleSubmit} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition text-base">
-                      Lanjut ke Pembayaran →
-                    </button>
-                  </div>
-          
-                  {/* RINGKASAN PEMBAYARAN */}
-                  <div>
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sticky top-20">
-                      <h2 className="text-base font-bold text-gray-800 mb-4">Ringkasan Pembayaran</h2>
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between"><span className="text-gray-500">Tipe Kamar</span><span className="font-semibold">{selectedRoom?.name}</span></div>
-                        <div className="flex justify-between"><span className="text-gray-500">Harga / Bulan</span><span className="font-semibold">{fmt(selectedRoom?.price)}</span></div>
-                        <div className="flex justify-between"><span className="text-gray-500">Durasi</span><span className="font-semibold">{duration} bulan</span></div>
-                        <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="font-semibold">{fmt(subtotal)}</span></div>
-                        {discount > 0 && (
-                          <div className="flex justify-between text-green-600">
-                            <span>Diskon {(discount*100).toFixed(0)}%</span>
-                            <span className="font-semibold">-{fmt(saving)}</span>
-                          </div>
-                        )}
-                        <div className="border-t border-gray-100 pt-3 flex justify-between">
-                          <span className="font-bold text-gray-800">Total</span>
-                          <span className="font-extrabold text-green-600 text-lg">{fmt(total)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            <h2 className="text-base font-bold text-gray-800 mb-4">Jadwal Sewa</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Masuk <span className="text-red-500">*</span></label>
+                <input type="date" value={checkin} onChange={e => setCheckin(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Durasi Sewa <span className="text-red-500">*</span></label>
+                <select value={duration} onChange={e => setDuration(Number(e.target.value))} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-green-500">
+                  <option value={1}>1 Bulan</option>
+                  <option value={3}>3 Bulan</option>
+                  <option value={6}>6 Bulan (hemat 5%)</option>
+                  <option value={12}>12 Bulan (hemat 10%)</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-4 bg-green-50 border border-green-100 rounded-xl px-4 py-3 flex justify-between">
+              <span className="text-sm text-gray-600 font-medium">Perkiraan Tanggal Keluar</span>
+              <span className="text-sm font-bold text-green-700">{checkoutDate()}</span>
+            </div>
+          </div>
+
+          {/* DATA PENYEWA */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h2 className="text-base font-bold text-gray-800 mb-4">Data Penyewa</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Nama Lengkap <span className="text-red-500">*</span></label>
+                <input type="text" placeholder="Masukkan nama lengkap sesuai KTP" value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500" />
+              </div>
+              {[['email', 'Email', 'email', 'contoh@email.com'], ['phone', 'Nomor HP / WhatsApp', 'tel', '08xx-xxxx-xxxx'], ['instansi', 'Instansi / Kampus / Perusahaan', 'text', 'Nama tempat bekerja atau kuliah']].map(([key, label, type, ph]) => (
+                <div key={key}>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">{label} {key !== 'instansi' && <span className="text-red-500">*</span>}</label>
+                  <input type={type} placeholder={ph} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500" />
                 </div>
-              </div> 
+              ))}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Jenis Kelamin <span className="text-red-500">*</span></label>
+                <select value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-green-500">
+                  <option value="">Pilih jenis kelamin</option>
+                  <option>Laki-laki</option><option>Perempuan</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Lahir <span className="text-red-500">*</span></label>
+                <input type="date" value={form.birthdate} onChange={e => setForm({ ...form, birthdate: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Pekerjaan <span className="text-red-500">*</span></label>
+                <select value={form.job} onChange={e => setForm({ ...form, job: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-green-500">
+                  <option value="">Pilih pekerjaan</option>
+                  <option>Mahasiswa</option><option>Karyawan Swasta</option><option>PNS / ASN</option><option>Wiraswasta</option><option>Profesional Freelance</option><option>Lainnya</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">Alamat Asal <span className="text-red-500">*</span></label>
+                <textarea rows={3} placeholder="Jl. Nama Jalan No. XX, Kecamatan, Kota, Provinsi" value={form.alamat} onChange={e => setForm({ ...form, alamat: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500 resize-none" />
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition text-base"
+          >
+            {loading ? 'Memproses...' : 'Lanjut ke Pembayaran →'}
+          </button>
+        </div>
+
+        {/* RINGKASAN PEMBAYARAN */}
+        <div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sticky top-20">
+            <h2 className="text-base font-bold text-gray-800 mb-4">Ringkasan Pembayaran</h2>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between"><span className="text-gray-500">Tipe Kamar</span><span className="font-semibold">{selectedRoom?.name}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Harga / Bulan</span><span className="font-semibold">{fmt(selectedRoom?.price)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Durasi</span><span className="font-semibold">{duration} bulan</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="font-semibold">{fmt(subtotal)}</span></div>
+              {discount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Diskon {(discount * 100).toFixed(0)}%</span>
+                  <span className="font-semibold">-{fmt(saving)}</span>
+                </div>
+              )}
+              <div className="border-t border-gray-100 pt-3 flex justify-between">
+                <span className="font-bold text-gray-800">Total</span>
+                <span className="font-extrabold text-green-600 text-lg">{fmt(total)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

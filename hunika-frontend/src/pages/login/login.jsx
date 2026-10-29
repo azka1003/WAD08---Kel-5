@@ -1,78 +1,62 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, Link } from 'react-router-dom';
 import API from '../../services/api';
 
 export default function Login({ setIsLoggedIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState('');
-  const location = useLocation();
-  const redirectPath = location.state?.from || "/";   
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-            // Tembak endpoint login buatan backend tim kalian
-            const response = await API.post('/login', {
-                email: email,
-                password: password,
-            });
+      const res = await API.post('/login', { email: email.trim(), password });
+      console.log("Respons login:", res.data);
 
+      const body = res.data;
+      const token =
+        body.token || body.access_token || body.data?.token || body.data?.access_token;
+      const user = body.user || body.data?.user || body.data || {};
 
-            // Jika sukses, backend biasanya mengirim access_token
-            const token = response.data.token;
-            
-            // Simpan token ke localStorage browser
-            localStorage.setItem('token', token);
+      if (!token) {
+        alert("Login diterima server, tapi token tidak ditemukan. Cek Console (F12) bagian 'Respons login'.");
+        return;
+      }
 
-            localStorage.setItem("isLogin", "true");
+      const roleRaw = String(user.role || "").toLowerCase();
+      const role = ["owner", "pemilik", "admin"].includes(roleRaw) ? "pemilik" : "pencari";
 
-            if (setIsLoggedIn) {
-              setIsLoggedIn(true);
-          }
+      localStorage.setItem("token", token);
+      localStorage.setItem("isLogin", "true");
+      localStorage.setItem("role", role);
+      localStorage.setItem("email", user.email || email);
+      setIsLoggedIn(true);
 
-          alert('Login Berhasil!');
-          
-          // Pindah ke halaman utama (home) atau dashboard
-          navigate('/');
-        } catch (err) {
-            console.error("Login Error", err);
+      navigate(role === "pemilik" ? "/dashboard-pemilik" : "/");
+    } catch (err) {
+      const status = err.response?.status;
+      const pesan = err.response?.data?.message || err.response?.data?.error;
 
-            const errorMessage = err.response?.data?.message || 'Email atau password salah';
+      console.log("Login gagal. Status:", status, "Respons:", err.response?.data);
 
-            alert(errorMessage);
-            
-            if (typeof setError === 'function'){
-              setError('Email atau password salah!');
-
-            }
-            
-        }
-    
-
-  
-
-    // Logika Role Sesuai Database & Simulasi
-  //   if (email === "user@gmail.com" && password === "123") {
-  //     localStorage.setItem("isLogin", "true");
-  //     localStorage.setItem("role", "pencari");
-  //     setIsLoggedIn(true);
-  //     navigate(redirectPath);
-  //   } else if (email === "owner@gmail.com" && password === "123") {
-  //     localStorage.setItem("isLogin", "true");
-  //     localStorage.setItem("role", "pemilik");
-  //     setIsLoggedIn(true);
-  //     navigate("/dashboard-pemilik");
-  //   } else {
-  //     alert("Email atau Password salah!");
-  //   }
+      if (!err.response) {
+        alert("Tidak bisa terhubung ke backend. Pastikan 'php artisan serve' sedang jalan di port 8000.");
+      } else if (status === 404) {
+        alert("Route /api/login tidak ditemukan (404). Cek routes/api.php di backend.");
+      } else {
+        alert(`Login gagal [${status}]: ${pesan || "Email atau password salah"}`);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="bg-slate-100 min-h-screen flex justify-center items-center p-6">
-            <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
 
         {/* Tombol Kembali */}
         <Link
@@ -90,8 +74,8 @@ export default function Login({ setIsLoggedIn }) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Email</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               placeholder="Masukkan Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -102,8 +86,8 @@ export default function Login({ setIsLoggedIn }) {
 
           <div>
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Password</label>
-            <input 
-              type="password" 
+            <input
+              type="password"
               placeholder="Masukkan Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -112,11 +96,12 @@ export default function Login({ setIsLoggedIn }) {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-3 rounded-xl transition duration-200 mt-2 shadow-sm"
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-medium p-3 rounded-xl transition duration-200 mt-2 shadow-sm"
           >
-            Login
+            {loading ? "Memproses..." : "Login"}
           </button>
         </form>
 

@@ -158,6 +158,61 @@ export default function DashboardPemilik() {
     }
   };
 
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // 1. Fungsi mengambil data transaksi
+  const fetchTransactions = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/owner/transactions", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setTransactions(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  // 2. Fungsi konfirmasi pembayaran
+  const handleApprove = async (paymentId) => {
+    const token = localStorage.getItem("token");
+    
+    // Konfirmasi sebelum melakukan aksi
+    if (!window.confirm("Apakah Anda yakin ingin menyetujui pembayaran ini?")) return;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/payments/${paymentId}/approve`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        alert("Pembayaran berhasil disetujui!");
+        // Panggil ulang data agar layar langsung ter-update (status berubah menjadi success)
+        fetchTransactions();
+      } else {
+        alert("Gagal menyetujui pembayaran.");
+      }
+    } catch (error) {
+      console.error("Error approving payment:", error);
+    }
+  };
+
+  if (loading) return <div>Memuat data transaksi...</div>;
+
   return (
     <main className="max-w-6xl mx-auto px-6 py-10">
       <div className="flex justify-between items-center mb-8">
@@ -255,7 +310,7 @@ export default function DashboardPemilik() {
               : 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer'
           }`}
         >
-          Furthermore
+          Next
         </button>
       </div>
 
@@ -307,6 +362,68 @@ export default function DashboardPemilik() {
                   required 
                 />
               </div>
+
+              <div className="bg-white p-5 rounded shadow">
+                <h2 className="text-xl font-bold mb-4">Kelola Transaksi & Pembayaran</h2>
+      
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="p-3">Pemesan</th>
+                    <th className="p-3">Kost</th>
+                    <th className="p-3">Total / Bukti</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((tx) => (
+                    <tr key={tx.payment_id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">{tx.user_name}</td>
+                      <td className="p-3">{tx.kost_name}</td>
+                      <td className="p-3">
+                         Rp {Number(tx.amount).toLocaleString('id-ID')} <br/>
+                        {tx.proof && (
+                          <a href={`http://127.0.0.1:8000/storage/${tx.proof}`} target="_blank" rel="noreferrer" className="text-blue-500 text-sm underline">
+                            Lihat Bukti
+                          </a>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${
+                            tx.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                              : tx.status === "success" || tx.status === "approved"
+                              ? "bg-green-100 text-green-800 border border-green-300"
+                              : "bg-red-100 text-red-800 border border-red-300"
+                          }`}
+                        >
+                          {tx.payment_status}
+                        </span>
+                      </td>
+
+                      {/* 2. Kolom Aksi Dinamis */}
+                      <td className="p-3">
+                        {tx.payment_status === "pending" ? (
+                          <button
+                            onClick={() => handleApprove(tx.payment_id)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            Konfirmasi
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 text-xs italic">
+                            Terverifikasi
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              </div>
+  
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

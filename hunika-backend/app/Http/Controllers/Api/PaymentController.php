@@ -144,4 +144,22 @@ class PaymentController extends Controller
         return response()->json(['message' => 'Gagal memverifikasi, transaksi dibatalkan', 'error' => $e->getMessage()], 500);
     }
     }
+
+    public function approvePayment($id)
+    {
+        // Ubah status payment menjadi success
+        $updatedPayment = DB::update('UPDATE payments SET status = ? WHERE id = ?', ['success', $id]);
+
+        if (!$updatedPayment) {
+            return response()->json(['status' => false, 'message' => 'Payment tidak ditemukan'], 404);
+        }
+
+        // Opsional: Anda juga bisa mengupdate status di tabel bookings menjadi 'success' / 'active'
+        // DB::update('UPDATE bookings SET status = ? WHERE id = (SELECT booking_id FROM payments WHERE id = ?)', ['active', $id]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Pembayaran berhasil dikonfirmasi!'
+        ], 200);
+    }
 }

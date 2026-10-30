@@ -5,9 +5,7 @@ import API from '../../services/api';
 export default function Login({ setIsLoggedIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState('');
-  const location = useLocation();
-  const redirectPath = location.state?.from || "/";   
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -73,7 +71,7 @@ export default function Login({ setIsLoggedIn }) {
 
   return (
     <div className="bg-slate-100 min-h-screen flex justify-center items-center p-6">
-            <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
 
         {/* Tombol Kembali */}
         <Link
@@ -91,8 +89,8 @@ export default function Login({ setIsLoggedIn }) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Email</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               placeholder="Masukkan Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -103,8 +101,8 @@ export default function Login({ setIsLoggedIn }) {
 
           <div>
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Password</label>
-            <input 
-              type="password" 
+            <input
+              type="password"
               placeholder="Masukkan Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -113,11 +111,12 @@ export default function Login({ setIsLoggedIn }) {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-3 rounded-xl transition duration-200 mt-2 shadow-sm"
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-medium p-3 rounded-xl transition duration-200 mt-2 shadow-sm"
           >
-            Login
+            {loading ? "Memproses..." : "Login"}
           </button>
         </form>
 

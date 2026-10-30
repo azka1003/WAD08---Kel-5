@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useKostDetail } from "../../hooks/useKost";
-import { Link } from "react-router-dom";
 
 export default function DetailKost() {
   const { id } = useParams();
@@ -11,22 +10,88 @@ export default function DetailKost() {
   const [comment, setComment] = useState("");
   const [reviews, setReviews] = useState([]);
 
-  const navigate =useNavigate();
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/kost/${id}/reviews`);
+      const data = await response.json();
+      
+      if (response.ok && data.status) {
+        setReviews(data.data); 
+      }
+    } catch (error) {
+      console.error("Gagal memuat ulasan:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchReviews();
+    }
+  }, [id]);
+
+  const navigate = useNavigate();
 
   const handleBooking = () => {
-  // 1. Cek status login dari localStorage
-  const isLoggedIn = localStorage.getItem("isLogin");
+    const isLoggedIn = localStorage.getItem("isLogin");
 
-  if (!isLoggedIn) {
-    // 2. Jika belum login, beri peringatan & arahkan ke halaman login
-    alert("Silakan login terlebih dahulu!");
-  navigate("/login");
-  } else {
-    // 3. Jika sudah login, lanjut ke halaman booking
-    navigate(`/booking/${kost.id}`); // atau rute booking milikmu
-  }
-};
+    if (isLoggedIn !== "true") {
+      alert("Silakan login terlebih dahulu!");
+      navigate("/login");
+    } else {
+      navigate(`/booking/${id}`);
+    }
+  };
 
+  const handleSubmitReview = async (e) => {
+    e.preventDefault(); // Mencegah halaman refresh
+
+    // 1. Ambil token dari localStorage
+    const token = localStorage.getItem("token");
+
+    // 2. Validasi login
+    if (!token) {
+      alert("Silakan login terlebih dahulu untuk memberikan ulasan!");
+      navigate("/login");
+      return;
+    }
+
+    // 3. Validasi rating tidak boleh 0
+    if (ratingInput < 1 || ratingInput > 5) {
+      alert("Silakan berikan rating 1 sampai 5 bintang.");
+      return;
+    }
+
+    try {
+      // 4. Kirim data ke endpoint Laravel dengan menyertakan Token JWT
+      const response = await fetch(`http://127.0.0.1:8000/api/kost/${id}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // WAJIB ADA karena middleware JWT
+        },
+        body: JSON.stringify({
+          rating: ratingInput,
+          comment: comment,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        alert("Ulasan berhasil dikirim!");
+        // Kosongkan form setelah berhasil
+        setRatingInput(0);
+        setComment("");
+        // Opsional: Anda bisa memanggil ulang useKostDetail di sini agar ulasan baru langsung muncul
+        fetchReviews();
+      } else {
+        alert(data.message || "Gagal mengirim ulasan.");
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Terjadi kesalahan sistem saat mengirim ulasan.");
+    }
+  };
 
   const { kost, loading, error } = useKostDetail(id);
 
@@ -143,7 +208,9 @@ export default function DetailKost() {
                   <span
                     key={star}
                     onClick={() => setRatingInput(star)}
-                    className={star <= ratingInput ? "text-yellow-500" : "text-gray-300"}
+                    className={
+                      star <= ratingInput ? "text-yellow-500" : "text-gray-300"
+                    }
                   >
                     ★
                   </span>
@@ -159,18 +226,7 @@ export default function DetailKost() {
               />
 
               <button
-                onClick={() => {
-                  if (!name || !ratingInput || !comment) return;
-
-                  setReviews((prev) => [
-                    ...prev,
-                    { name: name, rating: ratingInput, comment },
-                  ]);
-
-                  setName("");
-                  setRatingInput(0);
-                  setComment("");
-                }}
+                onClick={handleSubmitReview}
                 className="mt-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
               >
                 Kirim Ulasan
@@ -200,21 +256,39 @@ export default function DetailKost() {
               <div className="text-center text-5xl font-bold text-emerald-600">
                 {kost.rating}
               </div>
-              <div className="text-center text-3xl text-yellow-500">★★★★★</div>
+
+              {/* BINTANG SESUAI RATING */}
+              <div className="text-center">
+                <div className="relative inline-block text-3xl leading-none">
+                  <div className="text-gray-300">★★★★★</div>
+                  <div
+                    className="absolute top-0 left-0 overflow-hidden whitespace-nowrap text-yellow-500"
+                    style={{
+                      width: `${
+                        (Math.floor(Number(kost.rating) * 2) / 2 / 5) * 100
+                      }%`,
+                    }}
+                  >
+                    ★★★★★
+                  </div>
+                </div>
+              </div>
+
               <p className="text-sm text-center text-gray-600">28 Ulasan</p>
             </div>
 
             <div className="text-3xl text-center font-bold text-emerald-600">
-              Rp {Number(kost.price).toLocaleString("id-ID")}            </div>
+              Rp {Number(kost.price).toLocaleString("id-ID")}
+            </div>
 
             <p className="text-center text-gray-600 mb-4">per bulan</p>
 
             <button
-  onClick={handleBooking}
-  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm"
->
-  Booking Sekarang
-</button>
+              onClick={handleBooking}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm"
+            >
+              Booking Sekarang
+            </button>
 
             <div className="mt-5 space-y-3 text-sm">
               <p>🏠 Pemilik: Bu Sari</p>

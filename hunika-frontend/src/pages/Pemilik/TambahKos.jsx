@@ -123,10 +123,22 @@ export default function TambahKos() {
                 onChange={handleChange} 
                 className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500 bg-white"
               >
-                <option value="Jakarta Selatan">Jakarta Selatan</option>
-                <option value="Jakarta Barat">Jakarta Barat</option>
-                <option value="Jakarta Timur">Jakarta Timur</option>
-                <option value="Jakarta Pusat">Jakarta Pusat</option>
+                <option value="Kebayoran Baru, Jakarta Selatan">Kebayoran Baru, Jakarta Selatan</option>
+                <option value="Kebayoran Lama, Jakarta Selatan">Kebayoran Lama, Jakarta Selatan</option>
+                <option value="Cilandak, Jakarta Selatan">Cilandak, Jakarta Selatan</option>
+                <option value="Kemang, Jakarta Selatan">Kemang, Jakarta Selatan</option>
+                <option value="Pondok Indah, Jakarta Selatan">Pondok Indah, Jakarta Selatan</option>
+                <option value="Pesanggrahan, Jakarta Selatan">Pesanggrahan, Jakarta Selatan</option>
+                <option value="Cipete, Jakarta Selatan">Cipete, Jakarta Selatan</option>
+                <option value="Tebet, Jakarta Selatan">Tebet, Jakarta Selatan</option>
+                <option value="Setiabudi, Jakarta Selatan">Setiabudi, Jakarta Selatan</option>
+                <option value="Mampang, Jakarta Selatan">Mampang, Jakarta Selatan</option>
+                <option value="Fatmawati, Jakarta Selatan">Fatmawati, Jakarta Selatan</option>
+                <option value="Senopati, Jakarta Selatan">Senopati, Jakarta Selatan</option>
+                <option value="Gandaria, Jakarta Selatan">Gandaria, Jakarta Selatan</option>
+                <option value="Pancoran, Jakarta Selatan">Pancoran, Jakarta Selatan</option>
+                <option value="Jagakarsa, Jakarta Selatan">Jagakarsa, Jakarta Selatan</option>
+                <option value="Pasar Minggu, Jakarta Selatan">Pasar Minggu, Jakarta Selatan</option>
               </select>
             </div>
             <div>

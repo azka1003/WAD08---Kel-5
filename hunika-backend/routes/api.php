@@ -54,6 +54,8 @@ Route::middleware(['jwt', 'admin'])->group(function () {
     Route::post('/kost', [KostController::class, 'store']);    // Tambah kost
     Route::put('/kost/{id}', [KostController::class, 'update']); // Ubah kost
     Route::delete('/kost/{id}', [KostController::class, 'destroy']); // Hapus kost
-    Route::delete('/users/{id}', [AuthController::class, 'destroy']);
     Route::put('/payments/{id}', [PaymentController::class, 'updateStatus']);
+    Route::get('/owner/bookings', [BookingController::class, 'getOwnerBookings']);
+    Route::get('/owner/transactions', [BookingController::class, 'getTransactions']);
+    Route::put('/payments/{id}/approve', [PaymentController::class, 'approvePayment']);
 });

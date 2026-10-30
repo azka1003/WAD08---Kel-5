@@ -125,4 +125,26 @@ class BookingController extends Controller
 
         return response()->json(['data' => $bookingData], 200);
     }
+
+    public function getTransactions(Request $request)
+    {
+        // Mengambil semua transaksi beserta data kost dan usernya
+        $transactions = DB::select("
+            SELECT 
+                p.id as payment_id, p.amount, p.status as payment_status, p.proof,
+                b.id as booking_id, b.check_in_date, b.duration,
+                k.name as kost_name, 
+                u.name as user_name
+            FROM payments p
+            JOIN bookings b ON p.booking_id = b.id
+            JOIN kosts k ON b.kost_id = k.id
+            JOIN users u ON b.user_id = u.id
+            ORDER BY p.created_at DESC
+        ");
+
+        return response()->json([
+            'status' => true,
+            'data' => $transactions
+        ], 200);
+    }
 }

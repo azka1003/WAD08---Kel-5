@@ -125,22 +125,4 @@ class AuthController extends Controller
             ]
         ], 200);
     }
-
-    // Fungsi Hapus User
-    public function destroy($id)
-    {
-        // Cek apakah user ada
-        $user = DB::select('SELECT id FROM users WHERE id = ?', [$id]);
-
-        if (empty($user)) {
-            return response()->json(['message' => 'User tidak ditemukan'], 404);
-        }
-
-        try {
-            DB::delete('DELETE FROM users WHERE id = ?', [$id]);
-            return response()->json(['message' => 'Akun user berhasil dihapus'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Gagal menghapus user', 'error' => $e->getMessage()], 500);
-        }
-    }
 }

@@ -9,7 +9,7 @@ export default function TambahKos() {
   const [formData, setFormData] = useState({
     name: '',
     address: '',
-    area: 'Jakarta Selatan',
+    area: 'Kebayoran Baru, Jakarta Selatan',
     price: '',
     rooms: '2',
     years: '2024',
@@ -76,7 +76,7 @@ export default function TambahKos() {
         <button 
           type="button"
           onClick={() => navigate('/dashboard-pemilik')} 
-          className="text-sm text-gray-400 hover:text-emerald-600 font-semibold transition"
+          className="text-sm text-gray-400 hover:text-emerald-600 font-semibold transition cursor-pointer"
         >
           ← Kembali ke Dashboard
         </button>
@@ -116,12 +116,12 @@ export default function TambahKos() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Wilayah (Area)</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Wilayah (Khusus Jakarta Selatan)</label>
               <select 
                 name="area" 
                 value={formData.area} 
                 onChange={handleChange} 
-                className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500 bg-white"
+                className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500 bg-white cursor-pointer"
               >
                 <option value="Kebayoran Baru, Jakarta Selatan">Kebayoran Baru, Jakarta Selatan</option>
                 <option value="Kebayoran Lama, Jakarta Selatan">Kebayoran Lama, Jakarta Selatan</option>
@@ -250,7 +250,7 @@ export default function TambahKos() {
 
         <button 
           type="submit" 
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl transition shadow-sm text-sm"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl transition shadow-sm text-sm cursor-pointer"
         >
           Simpan Info Kos ke Database
         </button>

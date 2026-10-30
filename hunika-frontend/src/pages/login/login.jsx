@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import API from '../../services/api';
 
 export default function Login({ setIsLoggedIn }) {
@@ -10,48 +10,63 @@ export default function Login({ setIsLoggedIn }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
     try {
-      const res = await API.post('/login', { email: email.trim(), password });
-      console.log("Respons login:", res.data);
+      // Tembak endpoint login ke backend Laravel
+      const response = await API.post('/login', {
+        email: email,
+        password: password,
+      });
 
-      const body = res.data;
-      const token =
-        body.token || body.access_token || body.data?.token || body.data?.access_token;
-      const user = body.user || body.data?.user || body.data || {};
+      // 1. Ambil token, data user, dan status admin dari respons backend
+      const token = response.data.token;
+      const user = response.data.user; // Berisi data user termasuk is_admin
+      const isAdmin = user && (user.is_admin === true || user.is_admin === 1);
 
-      if (!token) {
-        alert("Login diterima server, tapi token tidak ditemukan. Cek Console (F12) bagian 'Respons login'.");
-        return;
+      // 2. Simpan ke localStorage browser
+      localStorage.setItem('token', token);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('role', isAdmin ? 'admin' : 'pencari'); // atau 'user'
+
+      // 3. Update state global jika props-nya dikirim dari App.jsx
+      if (typeof setIsLoggedIn === 'function') {
+        setIsLoggedIn(true);
       }
 
-      const roleRaw = String(user.role || "").toLowerCase();
-      const role = ["owner", "pemilik", "admin"].includes(roleRaw) ? "pemilik" : "pencari";
+      alert('Login Berhasil!');
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("isLogin", "true");
-      localStorage.setItem("role", role);
-      localStorage.setItem("email", user.email || email);
-      setIsLoggedIn(true);
-
-      navigate(role === "pemilik" ? "/dashboard-pemilik" : "/");
-    } catch (err) {
-      const status = err.response?.status;
-      const pesan = err.response?.data?.message || err.response?.data?.error;
-
-      console.log("Login gagal. Status:", status, "Respons:", err.response?.data);
-
-      if (!err.response) {
-        alert("Tidak bisa terhubung ke backend. Pastikan 'php artisan serve' sedang jalan di port 8000.");
-      } else if (status === 404) {
-        alert("Route /api/login tidak ditemukan (404). Cek routes/api.php di backend.");
+      // 4. Redirect cerdas: Jika admin ke dashboard pemilik, jika user biasa ke home/pencarian
+      if (isAdmin) {
+        navigate('/dashboard-pemilik');
       } else {
-        alert(`Login gagal [${status}]: ${pesan || "Email atau password salah"}`);
+        navigate('/');
       }
-    } finally {
-      setLoading(false);
+
+    } catch (err) {
+      console.error('Login Error', err);
+      const errorMessage = err.response?.data?.message || 'Email atau password salah';
+      alert(errorMessage);
+      if (typeof setError === 'function') {
+        setError(errorMessage);
+      }
     }
+
+
+  
+
+    // Logika Role Sesuai Database & Simulasi
+  //   if (email === "user@gmail.com" && password === "123") {
+  //     localStorage.setItem("isLogin", "true");
+  //     localStorage.setItem("role", "pencari");
+  //     setIsLoggedIn(true);
+  //     navigate(redirectPath);
+  //   } else if (email === "owner@gmail.com" && password === "123") {
+  //     localStorage.setItem("isLogin", "true");
+  //     localStorage.setItem("role", "pemilik");
+  //     setIsLoggedIn(true);
+  //     navigate("/dashboard-pemilik");
+  //   } else {
+  //     alert("Email atau Password salah!");
+  //   }
   };
 
   return (

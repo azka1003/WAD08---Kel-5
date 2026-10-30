@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { KostProvider } from "./context/KostContext";
 import Navbar from "./components/Navbar";
 
@@ -40,13 +40,34 @@ const App = () => {
 
         <div className="p-6">
           <Routes>
+            {/* Route Khusus Admin / Pemilik Kost */}
+  <Route 
+    path="/dashboard-pemilik" 
+    element={
+      localStorage.getItem('role') === 'admin' ? (
+        <DashboardPemilik />
+      ) : (
+        <Navigate to="/" replace />
+      )
+    } 
+  />
+  <Route 
+    path="/tambah-kost" 
+    element={
+      localStorage.getItem('role') === 'admin' ? (
+        <TambahKos />
+      ) : (
+        <Navigate to="/" replace />
+      )
+    } 
+  />
             <Route path="/" element={<SearchKost isLoggedIn={isLoggedIn} />} />
             <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/kost/:id" element={<DetailKost />} />
             <Route path="/review" element={<ReviewKos />} />
-            <Route path="/dashboard-pemilik" element={<DashboardPemilik />} />
+            {/* <Route path="/dashboard-pemilik" element={<DashboardPemilik />} /> */}
             <Route path="/tambah-kost" element={<TambahKos />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/booking/:id" element={<BookingPage />} />

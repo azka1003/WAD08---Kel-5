@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { KostProvider } from "./context/KostContext";
 import Navbar from "./components/Navbar";
+import './index.css';
 
 // Import Halaman-halaman
 import Login from "./pages/login/login";
@@ -26,6 +27,7 @@ const App = () => {
     localStorage.removeItem("isLogin");
     localStorage.removeItem("role");
     setIsLoggedIn(false);
+    
     setRole("");
   };
 

@@ -1,11 +1,31 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 export default function Navbar({ isLoggedIn, role, onLogout }) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const navigate = useNavigate();
 
+  // Pastikan hanya mendeteksi login jika token benar-benar ada di localStorage atau props
+  const token = localStorage.getItem('token');
+  const activeLogin = isLoggedIn || (token && token !== 'undefined' && token !== 'null');
   const userRole = role || localStorage.getItem('role');
-  const activeLogin = isLoggedIn || localStorage.getItem('isLoggedIn') || localStorage.getItem('token');
+
+  const handleLogoutClick = () => {
+    setShowDropdown(false);
+    
+    // Hapus seluruh data sesi di browser secara total
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('isLoggedIn');
+    
+    // Jika props onLogout tersedia dari parent, jalankan
+    if (typeof onLogout === 'function') {
+      onLogout();
+    }
+
+    // Paksa reload penuh ke halaman login agar navbar & state aplikasi bersih total
+    window.location.replace('/login');
+  };
 
   return (
     <nav className="sticky top-0 z-50 flex justify-between items-center px-8 py-4 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-xs">
@@ -58,15 +78,7 @@ export default function Navbar({ isLoggedIn, role, onLogout }) {
                   My Profile
                 </Link>
                 <button 
-                  onClick={() => {
-                    setShowDropdown(false);
-                    if (typeof onLogout === 'function') {
-                      onLogout();
-                    } else {
-                      localStorage.clear();
-                      window.location.href = '/login';
-                    }
-                  }} 
+                  onClick={handleLogoutClick} 
                   className="block w-full text-left px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                 >
                   Logout

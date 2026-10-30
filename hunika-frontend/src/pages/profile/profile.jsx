@@ -12,9 +12,9 @@ export default function Profile() {
 
   const handleLogout = () => {
     localStorage.removeItem("isLogin");
-    localStorage.removeItem("email");
-    localStorage.removeItem("role");
-    localStorage.removeItem("token");
+    // localStorage.removeItem("email");
+    // localStorage.removeItem("role");
+    // localStorage.removeItem("token");
 
     navigate("/");
     window.location.reload(); // supaya navbar ikut berubah jadi "Masuk"

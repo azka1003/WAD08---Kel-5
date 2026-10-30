@@ -21,16 +21,17 @@ export default function DashboardPemilik() {
     try {
       const response = await API.get(`/kost?page=${page}`); 
       
-      // Menyesuaikan dengan struktur API: { data: [...], meta: { current_page, total_pages, ... } }
       if (response.data) {
         const listData = response.data.data || response.data;
         setKosts(Array.isArray(listData) ? listData : []);
 
-        // Ambil halaman aktif dan total halaman dari objek meta backend
-        if (response.data.meta) {
-          setCurrentPage(Number(response.data.meta.current_page) || 1);
-          setLastPage(Number(response.data.meta.total_pages) || 1);
-        }
+        // Cek metadata dari response API
+        const meta = response.data.meta || response.data;
+        const current = meta.current_page || page;
+        const last = meta.total_pages || meta.last_page || meta.total_pages || 1;
+
+        setCurrentPage(Number(current));
+        setLastPage(Number(last));
       }
     } catch (err) {
       console.error('Gagal memuat data kost:', err);
@@ -132,36 +133,36 @@ export default function DashboardPemilik() {
         )}
       </div>
 
-      {/* Navigasi Pagination Dinamis Berdasarkan Meta Backend */}
-      <div className="flex justify-between items-center mt-6 px-2">
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage <= 1}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition select-none ${
-            currentPage <= 1 
-              ? 'bg-gray-100 text-gray-300 cursor-not-allowed pointer-events-none' 
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer'
-          }`}
-        >
-          Previously
-        </button>
+      {/* Navigasi Pagination */}
+<div className="flex justify-between items-center mt-6 px-2">
+  <button
+    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+    disabled={currentPage <= 1}
+    className={`px-4 py-2 rounded-xl text-xs font-bold transition select-none ${
+      currentPage <= 1 
+        ? 'bg-gray-100 text-gray-300 cursor-not-allowed pointer-events-none' 
+        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer'
+    }`}
+  >
+    Previously
+  </button>
 
-        <span className="text-xs font-bold text-gray-700">
-          Page {currentPage} of {lastPage || 1}
-        </span>
+  <span className="text-xs font-bold text-gray-700">
+    Page {currentPage} of {lastPage || 1}
+  </span>
 
-        <button
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, lastPage))}
-          disabled={currentPage >= lastPage}
-          className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition select-none ${
-            currentPage >= lastPage 
-              ? 'bg-emerald-300 cursor-not-allowed pointer-events-none' 
-              : 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer'
-          }`}
-        >
-          Furthermore
-        </button>
-      </div>
+  <button
+    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, lastPage))}
+    disabled={currentPage >= lastPage}
+    className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition select-none ${
+      currentPage >= lastPage 
+        ? 'bg-emerald-300 cursor-not-allowed pointer-events-none' 
+        : 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer'
+    }`}
+  >
+    Furthermore
+  </button>
+</div>
 
       {/* Modal Edit */}
       {isModalOpen && selectedKost && (

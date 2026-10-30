@@ -3,62 +3,71 @@ import { Link, NavLink } from "react-router-dom";
 
 export default function Navbar({ isLoggedIn, role, onLogout }) {
   const [showDropdown, setShowDropdown] = useState(false);
-  const navLinkClass = "text-sm font-medium hover:text-green-600 transition-colors duration-200";
+
+  const userRole = role || localStorage.getItem('role');
+  const activeLogin = isLoggedIn || localStorage.getItem('isLoggedIn') || localStorage.getItem('token');
 
   return (
-    <nav className="flex justify-between items-center px-6 py-4 bg-white border-b border-gray-100">
-      <Link to="/" className="flex items-center gap-2 font-bold text-xl text-emerald-600">
-        <span className="bg-emerald-600 text-white px-2 py-1 rounded-lg text-sm">H</span>
+    <nav className="sticky top-0 z-50 flex justify-between items-center px-8 py-4 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-xs">
+      <Link to="/" className="flex items-center gap-2 font-bold text-xl text-emerald-600 tracking-tight">
+        <span className="bg-emerald-600 text-white px-2.5 py-1 rounded-xl text-sm font-black shadow-sm">H</span>
         Hunika
       </Link>
 
-      <div className="flex items-center gap-6 text-sm font-medium text-slate-600">
-       {isLoggedIn && role === 'pemilik' && (
-  <>
-    <NavLink to="/" className={({isActive}) => `${navLinkClass} ${isActive ? 'text-green-600' : 'text-slate-600'}`}>
-      Cari Kos
-    </NavLink>
-    <NavLink to="/dashboard-pemilik" className={({isActive}) => `${navLinkClass} ${isActive ? 'text-green-600' : 'text-slate-600'}`}>
-      Dashboard Pemilik
-    </NavLink>
-  </>
-)}
-
-{isLoggedIn && role === 'pencari' && (
-  <NavLink to="/" className={({isActive}) => `${navLinkClass} ${isActive ? 'text-green-600' : 'text-slate-600'}`}>
-    Cari Kos
-  </NavLink>
-)}
-
-        {/* Menu untuk Pemilik (Muncul jika sudah login)
-        {isLoggedIn && (
+      {/* Menu Navigasi Tengah */}
+      <div className="flex items-center gap-6 text-sm font-semibold text-slate-600">
+        {activeLogin && (userRole === 'admin' || userRole === 'pemilik') ? (
           <NavLink 
             to="/dashboard-pemilik" 
-            className={({ isActive }) => isActive ? "text-emerald-600 border-b-2 border-emerald-600 pb-1" : "hover:text-emerald-600"}
+            className={({ isActive }) => 
+              `transition-colors duration-200 ${isActive ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-0.5' : 'hover:text-emerald-600'}`
+            }
           >
             Dashboard Pemilik
           </NavLink>
-        )} */}
+        ) : (
+          <NavLink 
+            to="/" 
+            className={({ isActive }) => 
+              `transition-colors duration-200 ${isActive ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-0.5' : 'hover:text-emerald-600'}`
+            }
+          >
+            Cari Kos
+          </NavLink>
+        )}
       </div>
 
+      {/* Bagian Kanan Navbar */}
       <div className="flex items-center gap-3">
-        {isLoggedIn ? (
+        {activeLogin ? (
           <div className="relative">
-            {/* Tombol Profil */}
             <button 
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-200 transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-100/80 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-200/80 transition cursor-pointer"
             >
-              👤 Profil
+              <span>👤</span> Profil
             </button>
 
-            {/* Dropdown Menu */}
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-32 bg-white border border-slate-100 rounded-lg shadow-lg py-2 z-10">
-                <Link to="/profile" className="block px-4 py-2 text-sm text-slate-600 hover:text-emerald-600">My Profile</Link>
+              <div className="absolute right-0 mt-2 w-36 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50">
+                <Link 
+                  to="/profile" 
+                  onClick={() => setShowDropdown(false)} 
+                  className="block px-4 py-2 text-sm text-slate-600 hover:text-emerald-600 hover:bg-slate-50 transition"
+                >
+                  My Profile
+                </Link>
                 <button 
-                  onClick={onLogout} 
-                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    setShowDropdown(false);
+                    if (typeof onLogout === 'function') {
+                      onLogout();
+                    } else {
+                      localStorage.clear();
+                      window.location.href = '/login';
+                    }
+                  }} 
+                  className="block w-full text-left px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                 >
                   Logout
                 </button>
@@ -66,10 +75,12 @@ export default function Navbar({ isLoggedIn, role, onLogout }) {
             )}
           </div>
         ) : (
-          <>
-            <Link to="/login" className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm rounded-xl">Masuk</Link>
-            {/* <Link to="/register" className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm rounded-xl">Daftar</Link> */}
-          </>
+          <Link 
+            to="/login" 
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition shadow-sm"
+          >
+            Masuk
+          </Link>
         )}
       </div>
     </nav>

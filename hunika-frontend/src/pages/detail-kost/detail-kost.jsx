@@ -31,10 +31,11 @@ export default function DetailKost() {
 
   const navigate = useNavigate();
 
+  // Diperbarui agar konsisten mengecek token JWT dari localStorage
   const handleBooking = () => {
-    const isLoggedIn = localStorage.getItem("isLogin");
+    const token = localStorage.getItem("token");
 
-    if (isLoggedIn !== "true") {
+    if (!token || token === "undefined" || token === "null") {
       alert("Silakan login terlebih dahulu!");
       navigate("/login");
     } else {
@@ -82,7 +83,6 @@ export default function DetailKost() {
         // Kosongkan form setelah berhasil
         setRatingInput(0);
         setComment("");
-        // Opsional: Anda bisa memanggil ulang useKostDetail di sini agar ulasan baru langsung muncul
         fetchReviews();
       } else {
         alert(data.message || "Gagal mengirim ulasan.");
@@ -161,32 +161,6 @@ export default function DetailKost() {
               ))}
             </div>
           </div>
-
-          {/* TIPE KAMAR
-          <div className="bg-white rounded-xl shadow mt-6 p-6 px-5">
-            <h2 className="text-xl font-bold mb-4">Tipe Kamar</h2>
-
-            <div className="space-y-3">
-              <div className="bg-green-100/50 rounded-lg flex justify-between items-center pb-3">
-                <div>
-                  <h3 className="font-semibold text-lg px-4 py-3">
-                    {kost.roomType}
-                  </h3>
-                  <p className="text-sm text-gray-500 px-4">Kapasitas 1 Orang</p>
-                </div>
-
-                <div className="text-right">
-                  <div className="font-bold text-green-600 px-4 py-3">
-                    Rp {kost.price}
-                  </div>
-
-                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded px-7">
-                    Tersedia
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div> */}
 
           {/* ULASAN */}
           <div className="bg-white rounded-xl shadow mt-5 p-4">
@@ -285,7 +259,7 @@ export default function DetailKost() {
 
             <button
               onClick={handleBooking}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition mb-3 text-sm cursor-pointer"
             >
               Booking Sekarang
             </button>
